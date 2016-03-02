@@ -1,0 +1,84 @@
+#!/usr/bin/env node
+
+'use strict'
+
+let fs = require('fs')
+let fm = require('front-matter')
+
+let md_parse = function(file, idx) {
+    return new Promise( (resolve, reject) => {
+	fs.readFile(file, 'utf8', (err, data) => {
+	    if (err) {
+		reject(err)
+		return
+	    }
+	    let r = fm(data)
+	    resolve({
+		idx: idx,
+		subject: r.attributes.subject || '(No Subject)',
+		authors: [].concat(r.attributes.authors || 'Anonymous')
+	    })
+	})
+    })
+}
+
+let author_idx = function(arr, name) {
+    for (let idx = 0; idx < arr.length; ++idx) {
+	if (arr[idx].n === name) return idx
+    }
+    return -1
+}
+
+if (process.argv.length === 2) {
+    console.error("Usage: index YYYY/DD/MM/1.md ...")
+    process.exit(1)
+}
+
+let index = {
+    "posts": [],
+    "authors": []
+}
+let parsed = []
+let files = process.argv.slice(2).sort()
+
+files.forEach( (file, idx) => {
+    let m = file.match(/(\d{4})\/(\d{2})\/(\d{2})\/(.+).md$/)
+    if (!m) throw Error(`invalid input file: ${file}`)
+
+    let promise = md_parse(file, idx)
+	.then( (meta) => {
+	    meta.authors.forEach( (ar) => {
+		let pos = author_idx(index.authors, ar)
+
+		if (pos === -1) {
+		    index.authors.push({
+			n: ar,
+			p: [meta.idx]
+		    })
+		} else {
+		    index.authors[pos].p.push(meta.idx)
+		}
+	    })
+
+	    index.posts[meta.idx] = {
+		n: m[4],
+		y: m[1],
+		m: m[2],
+		d: m[3],
+		s: meta.subject,
+		a: meta.authors.map( (name) => {
+		    return author_idx(index.authors, name)
+		})
+	    }
+	})
+	.catch((err) => {
+	    console.error(err.message)
+	    process.exit(1)
+	})
+
+    parsed.push(promise)
+})
+
+Promise.all(parsed).then( ()=> {
+    process.stdout.write(JSON.stringify(index))
+})

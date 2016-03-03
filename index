@@ -4,6 +4,7 @@
 
 let fs = require('fs')
 let fm = require('front-matter')
+let argv = require('minimist')(process.argv.slice(2))
 
 let md_parse = function(file, idx) {
     return new Promise( (resolve, reject) => {
@@ -22,14 +23,8 @@ let md_parse = function(file, idx) {
     })
 }
 
-let author_idx = function(arr, name) {
-    for (let idx = 0; idx < arr.length; ++idx) {
-	if (arr[idx].n === name) return idx
-    }
-    return -1
-}
 
-if (process.argv.length === 2) {
+if (!argv._.length) {
     console.error("Usage: index YYYY/DD/MM/1.md ...")
     process.exit(1)
 }
@@ -39,25 +34,20 @@ let index = {
     "authors": []
 }
 let parsed = []
-let files = process.argv.slice(2).sort()
+let files = argv._.sort()
 
 files.forEach( (file, idx) => {
     let m = file.match(/(\d{4})\/(\d{2})\/(\d{2})\/(.+).md$/)
-    if (!m) throw Error(`invalid input file: ${file}`)
+    if (!m) {
+	if (argv.v) console.error(`ignoring ${file}`)
+	return
+    }
 
     let promise = md_parse(file, idx)
 	.then( (meta) => {
 	    meta.authors.forEach( (ar) => {
-		let pos = author_idx(index.authors, ar)
-
-		if (pos === -1) {
-		    index.authors.push({
-			n: ar,
-			p: [meta.idx]
-		    })
-		} else {
-		    index.authors[pos].p.push(meta.idx)
-		}
+		if (-1 === index.authors.indexOf(ar))
+		    index.authors.push(ar)
 	    })
 
 	    index.posts[meta.idx] = {
@@ -67,7 +57,7 @@ files.forEach( (file, idx) => {
 		d: m[3],
 		s: meta.subject,
 		a: meta.authors.map( (name) => {
-		    return author_idx(index.authors, name)
+		    return index.authors.indexOf(name)
 		})
 	    }
 	})

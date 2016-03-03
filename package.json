@@ -1,0 +1,13 @@
+{
+    "name": "jekyllmk",
+    "version": "0.0.1",
+    "private": true,
+    "description": "A make-based simple site generator",
+    "author": "Alexander Gromnitsky",
+    "license": "MIT",
+
+    "dependencies": {
+	"minimist": "~1.2.0",
+	"front-matter": "~2.0.6"
+    }
+}

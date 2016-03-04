@@ -7,6 +7,7 @@ let CalendarService = ng.core.Class({
 	    posts: [1,2,3],
 	    authors: [7,8,9]
 	}
+	console.log('CalendarService: fetch')
     }],
     posts: function() {
 	return this.index.posts
@@ -23,11 +24,11 @@ app.LastN = ng.core.Component({
 </ul>
 
 <ul>
-<li *ngFor="#idx of calser.posts()">{{idx}}</li>
+<li *ngFor="#idx of cal.posts()">{{idx}}</li>
 </ul>
 
 <ul>
-<li *ngFor="#idx of calser.index.authors">{{idx}}</li>
+<li *ngFor="#idx of cal.index.authors">{{idx}}</li>
 </ul>
 
 <p *ngIf="names.length >= 3">3 or more names</p>
@@ -35,41 +36,72 @@ app.LastN = ng.core.Component({
 <button (click)="hello()">hello</button>
 `
 }).Class({
-    constructor: [ng.router.Router, CalendarService, function (router, calser) {
-	this.router = router;
-	this.calser = calser
+    constructor: [ng.router.Router, CalendarService, function (router, cal) {
+	this.router = router
+	this.cal = cal
 	this.foo = "bar"
 	this.names = ["one", "two", "three"]
     }],
     hello: function () {
-	this.router.navigate(['/Tags']);
+//	this.router.navigate(['/Tags', {id: null}])
+	this.router.navigate(['/Month', {year: '2000', month: '12'}])
     }
 })
 
 app.Tags = ng.core.Component({
     selector: 'tags',
-    template: '<h1>Tags</h1>',
+    template: '<h1>Tags: {{params.id}}</h1>',
 }).Class({
-    constructor: [ng.router.Router, function (router) {
-	this.router = router;
+    constructor:
+    [ng.router.Router, ng.router.RouteParams, function (router, params) {
+	this.router = router
+	this.params = params.params
     }]
 })
+
+app.Month = ng.core.Component({
+    selector: 'month',
+    template: '<h1>Month {{params.year}}-{{params.month}}</h1>',
+}).Class({
+    constructor:
+    [ng.router.Router, ng.router.RouteParams, function (router, params) {
+	this.router = router;
+	this.params = params.params
+	console.log(this.params)
+    }]
+})
+
+app.Post = ng.core.Component({
+    selector: 'post',
+    template: '<h1>Post: {{params.name}}</h1>',
+}).Class({
+    constructor:
+    [ng.router.Router, ng.router.RouteParams, function (router, params) {
+	this.router = router;
+	this.params = params.params
+	console.log(this.params)
+    }]
+})
+
 
 app.Main = ng.core.Component({
     selector: 'my-app',
     template: '<router-outlet></router-outlet>',
     directives: [ng.router.ROUTER_DIRECTIVES],
 }).Class({
-    constructor: [ng.router.Router, ng.http.Http, function (router, http) {
-	console.log('Main')
+    constructor:
+    [ng.router.Router, CalendarService, function (router, cal) {
+	this.cal = cal
+	console.log('Main', cal.posts())
     }],
 })
 
-app.Main = ng.router
-    .RouteConfig([
-	{ path: '/lastn', component: app.LastN, name: 'LastN', useAsDefault: true },
-	{ path: '/tags', component: app.Tags, name: 'Tags' },
-    ])(app.Main)
+app.Main = ng.router.RouteConfig([
+    { path: '/', component: app.LastN, name: 'LastN', useAsDefault: true },
+    { path: '/tags/:id', component: app.Tags, name: 'Tags' },
+    { path: '/:year/:month', component: app.Month, name: 'Month' },
+    { path: '/:year/:month/:name', component: app.Post, name: 'Post' }
+])(app.Main)
 
 
 document.addEventListener('DOMContentLoaded', function () {

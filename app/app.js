@@ -1,13 +1,14 @@
 /* globals ng */
 'use strict';
 
-let CalendarService = ng.core.Class({
+let IndexService = ng.core.Class({
     constructor: [ng.http.Http, function(http) {
+	this.q = 1
 	this.index = {
 	    posts: [1,2,3],
 	    authors: [7,8,9]
 	}
-	console.log('CalendarService: fetch')
+	console.log('IndexService: fetch')
     }],
     posts: function() {
 	return this.index.posts
@@ -24,11 +25,11 @@ app.LastN = ng.core.Component({
 </ul>
 
 <ul>
-<li *ngFor="#idx of cal.posts()">{{idx}}</li>
+<li *ngFor="#idx of index.posts()">{{idx}}</li>
 </ul>
 
 <ul>
-<li *ngFor="#idx of cal.index.authors">{{idx}}</li>
+<li *ngFor="#idx of index.index.authors">{{idx}}</li>
 </ul>
 
 <p *ngIf="names.length >= 3">3 or more names</p>
@@ -36,9 +37,9 @@ app.LastN = ng.core.Component({
 <button (click)="hello()">hello</button>
 `
 }).Class({
-    constructor: [ng.router.Router, CalendarService, function (router, cal) {
+    constructor: [ng.router.Router, IndexService, function (router, index) {
 	this.router = router
-	this.cal = cal
+	this.index = index
 	this.foo = "bar"
 	this.names = ["one", "two", "three"]
     }],
@@ -83,17 +84,30 @@ app.Post = ng.core.Component({
     }]
 })
 
+app.Nav = ng.core.Component({
+    selector: 'my-nav',
+    templateUrl: 'my-nav.template',
+}).Class({
+    constructor: [IndexService, function (index) {
+	this.index = index
+	console.log('app.Nav')
+    }],
+})
 
 app.Main = ng.core.Component({
     selector: 'my-app',
-    template: '<router-outlet></router-outlet>',
-    directives: [ng.router.ROUTER_DIRECTIVES],
+    templateUrl: 'main.template',
+    directives: [ng.router.ROUTER_DIRECTIVES, app.Nav],
 }).Class({
-    constructor:
-    [ng.router.Router, CalendarService, function (router, cal) {
-	this.cal = cal
-	console.log('Main', cal.posts())
-    }],
+    constructor: function () {
+	console.log('app.Main')
+    },
+
+    nav_toggle: function() {
+	// how to get a pointer to already created app.Nav instance?
+	// if we use 'providers' we get _another_ app.Nav instance :(
+	document.querySelector('my-nav > nav').classList.toggle('my-nav_aside')
+    }
 })
 
 app.Main = ng.router.RouteConfig([
@@ -107,7 +121,8 @@ app.Main = ng.router.RouteConfig([
 document.addEventListener('DOMContentLoaded', function () {
     ng.platform.browser
 	.bootstrap(app.Main, [
-	    CalendarService,
+	    IndexService,
+
 	    ng.http.HTTP_PROVIDERS,
 
 	    ng.router.ROUTER_PROVIDERS,

@@ -73,8 +73,7 @@ $(npm.js.dest): node_modules.mk
 compile: $(npm.js.dest)
 
 
-app.static.src := $(wildcard $(src)/app/*.html \
-	$(src)/app/*.css $(src)/app/*.jpg $(src)/app/*.svg)
+app.static.src := $(filter-out %.js, $(wildcard $(src)/app/*))
 app.static.dest := $(patsubst $(src)/app/%, $(out)/%, $(app.static.src))
 
 $(app.static.dest): $(out)/%: $(src)/app/%

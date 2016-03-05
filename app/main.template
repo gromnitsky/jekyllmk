@@ -1,0 +1,17 @@
+<!-- -*-html-*- -->
+
+<header class="my-main-header">
+  <div><button (click)="nav_toggle()">&Xi;</button></div>
+  <h1>TODO: title</h1>
+</header>
+
+<my-nav></my-nav>
+
+<router-outlet></router-outlet>
+
+<footer class="my-main-footer">
+  <p>
+    This is no time to bite the bullet with our synchronised
+    incremental paradigm shifts.
+  </p>
+</footer>

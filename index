@@ -35,15 +35,17 @@ let index = {
 }
 let parsed = []
 let files = argv._.sort()
+let files_ignored = 0
 
 files.forEach( (file, idx) => {
     let m = file.match(/(\d{4})\/(\d{2})\/(\d{2})\/(.+).md$/)
     if (!m) {
 	if (argv.v) console.error(`ignoring ${file}`)
+	files_ignored++
 	return
     }
 
-    let promise = md_parse(file, idx)
+    let promise = md_parse(file, idx - files_ignored)
 	.then( (meta) => {
 	    meta.authors.forEach( (ar) => {
 		if (-1 === index.authors.indexOf(ar))

@@ -113,6 +113,42 @@ app.Nav = ng.core.Component({
 	    })
 	})
 	data.index.authors = authors
+
+	// reorganize posts into a calendar
+	let years = {}
+	data.index.posts.forEach( post => {
+	    if (post.y in years) {
+		years[post.y].push(post)
+	    } else {
+		years[post.y] = [post]
+	    }
+	})
+
+	let calendar = []
+	Object.keys(years).sort().forEach( (year, idx) => {
+	    let months = {}
+	    years[year].forEach( post => {
+		if (post.m in months) {
+		    months[post.m].push(post)
+		} else {
+		    months[post.m] = [post]
+		}
+	    })
+
+	    calendar[idx] = { year }
+	    Object.keys(months).sort().forEach( key => {
+		calendar[idx].months = calendar[idx].months || []
+		calendar[idx].months.push({ month: key, posts: months[key]})
+	    })
+	})
+
+	data.cal = calendar
+	console.log(calendar)
+    },
+
+    toggle_view: function(e) {
+	e.target.classList.toggle('my-nav-menu-expanded')
+	e.target.nextElementSibling.classList.toggle('my-nav-menu_items-collapsed')
     }
 })
 

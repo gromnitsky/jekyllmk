@@ -48,13 +48,29 @@ section > p:first-child:first-letter {
     box-shadow: 3px 3px 6px gray;
 }
 
-.my-nav ul {
-    padding-left: 1.2em;
-}
-
 .my-nav_aside {
     transform: translateX(-110%);
     box-shadow: 0px 0px 0px;
+}
+
+.my-nav > ul.my-nav-menu {
+    padding-left: 0;
+}
+
+.my-nav-menu {
+    list-style-type: none;
+}
+
+span.my-nav-menu-collapsed::before {
+    content: "[+]\a";
+}
+
+span.my-nav-menu-expanded::before {
+    content: "[-]\a";
+}
+
+.my-nav-menu_items-collapsed {
+    display: none;
 }
 
 @media (min-width: 701px) {

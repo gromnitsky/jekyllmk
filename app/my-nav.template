@@ -2,10 +2,30 @@
 
 <nav class="my-nav my-nav_aside">
   <h2>Archive</h2>
-  <h3>2016</h3>
-  <ul>
-    <li>January</li>
-    <li>February</li>
+
+  <ul class="my-nav-menu">
+    <li *ngFor="#year of data?.cal">
+      <span (click)="toggle_view($event)" class="my-nav-menu-collapsed">
+	{{ year.year }}
+      </span>
+
+      <ul class="my-nav-menu my-nav-menu_items-collapsed">
+	<li *ngFor="#month of year.months">
+	  <span (click)="toggle_view($event)"
+		class="my-nav-menu-collapsed">
+	    {{ month.month }}
+	  </span>
+
+	  <ul class="my-nav-menu_items-collapsed">
+	    <li *ngFor="#post of month.posts">
+	      {{ post.s }}
+	    </li>
+	  </ul>
+
+	</li>
+      </ul>
+
+    </li>
   </ul>
 
   <h2>Authors</h2>

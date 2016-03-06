@@ -16,7 +16,7 @@ let IndexService = ng.core.Class({
 
 	let index$ = http.get(this.url_index).map(res => res.json())
 	let meta$ = http.get(this.url_meta).map(res => res.json())
-	this.src = Rx.Observable.zip(index$, meta$, (index, meta) => {
+	this.$src = Rx.Observable.zip(index$, meta$, (index, meta) => {
 	    return {
 		index,
 		meta
@@ -90,13 +90,30 @@ app.Nav = ng.core.Component({
     constructor: [OBD, IndexService, function (obd, indser) {
 	console.log('app.Nav')
 
-	indser.src.subscribe((data) => {
+	indser.$src.subscribe((data) => {
 	    console.log('app.Nav: http.get DONE')
+	    this.postproc(data)
 	    this.data = data
+//	    console.log(data)
 	}, (err) => {
 	    obd.err.text = `HTTP ${err.status}: ${indser.url_index} || ${indser.url_meta}`
 	})
     }],
+
+    // modifies data!
+    postproc: function(data) {
+	let authors = []
+	data.index.authors.forEach( (author) => {
+	    authors.push({ name: author, count: 0 })
+	})
+
+	data.index.posts.forEach( (post, idx) => {
+	    post.a.forEach(ai => {
+		authors[ai].count++
+	    })
+	})
+	data.index.authors = authors
+    }
 })
 
 app.Main = ng.core.Component({

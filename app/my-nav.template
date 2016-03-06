@@ -7,4 +7,9 @@
     <li>January</li>
     <li>February</li>
   </ul>
+
+  <h2>Authors</h2>
+  <ul>
+    <li *ngFor="#idx of data?.index?.authors">{{ idx.name }} ({{ idx.count }})</li>
+  </ul>
 </nav>

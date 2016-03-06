@@ -48,6 +48,10 @@ section > p:first-child:first-letter {
     box-shadow: 3px 3px 6px gray;
 }
 
+.my-nav ul {
+    padding-left: 1.2em;
+}
+
 .my-nav_aside {
     transform: translateX(-110%);
     box-shadow: 0px 0px 0px;

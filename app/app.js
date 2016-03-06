@@ -1,18 +1,28 @@
-/* globals ng */
+/* globals ng, Rx */
 'use strict';
+
+let OBD = ng.core.Class({
+    constructor: function() {
+	this.err = {}
+	this.err.text = null
+    }
+})
 
 let IndexService = ng.core.Class({
     constructor: [ng.http.Http, function(http) {
-	this.q = 1
-	this.index = {
-	    posts: [1,2,3],
-	    authors: [7,8,9]
-	}
-	console.log('IndexService: fetch')
-    }],
-    posts: function() {
-	return this.index.posts
-    }
+	console.log('IndexService: http.get')
+	this.url_index = 'index.json'
+	this.url_meta = 'meta.json'
+
+	let index$ = http.get(this.url_index).map(res => res.json())
+	let meta$ = http.get(this.url_meta).map(res => res.json())
+	this.src = Rx.Observable.zip(index$, meta$, (index, meta) => {
+	    return {
+		index,
+		meta
+	    }
+	})
+    }]
 })
 
 let app = {}
@@ -24,16 +34,6 @@ app.LastN = ng.core.Component({
 <li *ngFor="#idx of names">{{idx}}</li>
 </ul>
 
-<ul>
-<li *ngFor="#idx of index.posts()">{{idx}}</li>
-</ul>
-
-<ul>
-<li *ngFor="#idx of index.index.authors">{{idx}}</li>
-</ul>
-
-<p *ngIf="names.length >= 3">3 or more names</p>
-
 <button (click)="hello()">hello</button>
 `
 }).Class({
@@ -44,7 +44,6 @@ app.LastN = ng.core.Component({
 	this.names = ["one", "two", "three"]
     }],
     hello: function () {
-//	this.router.navigate(['/Tags', {id: null}])
 	this.router.navigate(['/Month', {year: '2000', month: '12'}])
     }
 })
@@ -88,9 +87,15 @@ app.Nav = ng.core.Component({
     selector: 'my-nav',
     templateUrl: 'my-nav.template',
 }).Class({
-    constructor: [IndexService, function (index) {
-	this.index = index
+    constructor: [OBD, IndexService, function (obd, indser) {
 	console.log('app.Nav')
+
+	indser.src.subscribe((data) => {
+	    console.log('app.Nav: http.get DONE')
+	    this.data = data
+	}, (err) => {
+	    obd.err.text = `HTTP ${err.status}: ${indser.url_index} || ${indser.url_meta}`
+	})
     }],
 })
 
@@ -99,9 +104,10 @@ app.Main = ng.core.Component({
     templateUrl: 'main.template',
     directives: [ng.router.ROUTER_DIRECTIVES, app.Nav],
 }).Class({
-    constructor: function () {
+    constructor: [OBD, function (obd) {
 	console.log('app.Main')
-    },
+	this.obd = obd
+    }],
 
     nav_toggle: function() {
 	// how to get a pointer to already created app.Nav instance?
@@ -122,6 +128,7 @@ document.addEventListener('DOMContentLoaded', function () {
     ng.platform.browser
 	.bootstrap(app.Main, [
 	    IndexService,
+	    OBD,
 
 	    ng.http.HTTP_PROVIDERS,
 

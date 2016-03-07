@@ -1,6 +1,10 @@
 /* globals ng, Rx */
 'use strict';
 
+let fm = require('front-matter')
+let marked = require('marked')
+
+
 let OBD = ng.core.Class({
     constructor: function() {
 	this.err = {}
@@ -44,7 +48,7 @@ app.LastN = ng.core.Component({
 	this.names = ["one", "two", "three"]
     }],
     hello: function () {
-	this.router.navigate(['/Month', {year: '2000', month: '12'}])
+	this.router.navigate(['/Tags', {id: 'untagged'}])
     }
 })
 
@@ -59,33 +63,59 @@ app.Tags = ng.core.Component({
     }]
 })
 
-app.Month = ng.core.Component({
-    selector: 'month',
-    template: '<h1>Month {{params.year}}-{{params.month}}</h1>',
-}).Class({
-    constructor:
-    [ng.router.Router, ng.router.RouteParams, function (router, params) {
-	this.router = router;
-	this.params = params.params
-	console.log(this.params)
-    }]
+let PostService = ng.core.Class({
+    constructor: [ng.http.Http, function(http) {
+	console.log('PostService')
+	this.http = http
+    }],
+
+    url: function(params) {
+	return `${params.year}/${params.month}/${params.day}/${params.name}.md`
+    },
+
+    html$: function(params) {
+	return this.http.get(this.url(params)).map(res => {
+	    let r = fm(res._body)
+	    return {
+		body: marked(r.body) // FIXME: replace after rendering
+		    .replace( /(<\s*img\s+src=['"])([^'"]+?)/igm,
+			     `$1${params.year}/${params.month}/${params.day}/$2`),
+		url_src: res.url,
+		// FIXME: extract to a lib
+		subject: r.attributes.subject || '(No Subject)',
+		authors: [].concat(r.attributes.authors || 'Anonymous'),
+		tags: [].concat(r.attributes.tags || 'untagged'),
+		time: r.attributes.time
+	    }
+	})
+    }
 })
 
 app.Post = ng.core.Component({
     selector: 'post',
-    template: '<h1>Post: {{params.name}}</h1>',
+    templateUrl: 'post.template',
+    directives: [ng.router.ROUTER_DIRECTIVES],
+    providers: [PostService]
 }).Class({
     constructor:
-    [ng.router.Router, ng.router.RouteParams, function (router, params) {
+    [ng.router.Router, ng.router.RouteParams, PostService, OBD, function (router, params, ps, obd) {
+	console.log('app.Post')
 	this.router = router;
 	this.params = params.params
-	console.log(this.params)
+
+	ps.html$(this.params).subscribe((data) => {
+	    console.log(`app.Post: http.get ${ps.url(this.params)} DONE`)
+	    this.data = data
+	}, (err) => {
+	    obd.err.text = `HTTP ${err.status}: ${ps.url(this.params)}`
+	})
     }]
 })
 
 app.Nav = ng.core.Component({
     selector: 'my-nav',
     templateUrl: 'my-nav.template',
+    directives: [ng.router.ROUTER_DIRECTIVES],
 }).Class({
     constructor: [OBD, IndexService, function (obd, indser) {
 	console.log('app.Nav')
@@ -143,7 +173,6 @@ app.Nav = ng.core.Component({
 	})
 
 	data.cal = calendar
-	console.log(calendar)
     },
 
     toggle_view: function(e) {
@@ -172,8 +201,7 @@ app.Main = ng.core.Component({
 app.Main = ng.router.RouteConfig([
     { path: '/', component: app.LastN, name: 'LastN', useAsDefault: true },
     { path: '/tags/:id', component: app.Tags, name: 'Tags' },
-    { path: '/:year/:month', component: app.Month, name: 'Month' },
-    { path: '/:year/:month/:name', component: app.Post, name: 'Post' }
+    { path: '/:year/:month/:day/:name', component: app.Post, name: 'Post' }
 ])(app.Main)
 
 

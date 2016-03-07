@@ -1,0 +1,26 @@
+<!-- -*-html-*- -->
+
+<article class="my-article">
+  <header>
+    <h2>{{ data?.subject }}</h2>
+    <p>
+      Authors: {{ data?.authors?.join(", ") }}<br>
+      <time>
+	{{ params.year }}-{{ params.month }}-{{ params.day }}
+	{{ data?.time }}
+      </time>
+    </p>
+  </header>
+
+  <section>
+      <p [innerHTML]="data?.body"></p>
+  </section>
+
+  <footer>
+    <p>
+      Tags: {{ data?.tags?.join(", ") }}<br>
+      <a href="{{ data?.url_src }}" target="_blank">Source</a>
+    </p>
+  </footer>
+
+</article>

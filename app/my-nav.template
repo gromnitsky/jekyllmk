@@ -18,7 +18,9 @@
 
 	  <ul class="my-nav-menu_items-collapsed">
 	    <li *ngFor="#post of month.posts">
-	      {{ post.s }}
+	      <a [routerLink]="['Post', {year: post.y, month: post.m, day: post.d, name: post.n } ]">
+		{{ post.s }}
+	      </a>
 	    </li>
 	  </ul>
 

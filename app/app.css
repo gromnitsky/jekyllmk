@@ -31,12 +31,24 @@ footer.my-main-footer {
     color: gray;
 }
 
-section > p:first-child:first-letter {
+.my-article section > p:first-child:first-letter {
     font-size: x-large;
     /* border: 1px solid red; */
     margin-right: 0.4em;
     /* margin-top: -0.1em; */
     float: left;
+}
+
+.my-article footer {
+    color: gray;
+}
+
+.my-article a {
+    text-decoration: none;
+}
+
+.my-article a:hover {
+    text-decoration: underline;
 }
 
 .my-nav {
@@ -47,6 +59,15 @@ section > p:first-child:first-letter {
     position: absolute;
     box-shadow: 3px 3px 6px gray;
     width: 230px;
+}
+
+.my-nav a:hover {
+    text-decoration: underline;
+}
+
+.my-nav a {
+    color: whitesmoke;
+    text-decoration: none;
 }
 
 .my-nav_aside {

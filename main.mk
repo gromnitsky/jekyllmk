@@ -98,9 +98,27 @@ $(out)/%$(app.js.dest.ext): $(src)/app/%.js
 	$(babel) --presets es2015 $(BABEL_OPT) $< -o $@
 
 
-es6.dest := $(patsubst %.es5, %.js, $(app.js.dest))
-ifeq ($(app.js.dest.ext), .es5)
+browserify := node_modules/.bin/browserify
+ifeq ($(NODE_ENV), development)
+BROWSERIFY_OPT := -d
+endif
+
+bundles.src := $(out)/app$(app.js.dest.ext)
+bundles.dest := $(patsubst %$(app.js.dest.ext), \
+	%.browserify$(app.js.dest.ext), $(bundles.src))
+
+$(bundles.dest): %.browserify$(app.js.dest.ext): %$(app.js.dest.ext)
+	$(mkdir)
+	$(browserify) $(BROWSERIFY_OPT) $< -o $@
+
+$(bundles.dest): node_modules.mk
+
+
+es6.dest := $(patsubst %.es5, %.js, $(bundles.dest))
+# we need only bundles
 .INTERMEDIATE: $(app.js.dest)
+ifeq ($(app.js.dest.ext), .es5)
+.INTERMEDIATE: $(bundles.dest)
 endif
 UGLIFYJS_OPT := --screw-ie8 -m -c
 

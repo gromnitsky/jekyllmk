@@ -46,10 +46,10 @@ section > p:first-child:first-letter {
     transition: all 0.5s;
     position: absolute;
     box-shadow: 3px 3px 6px gray;
+    width: 230px;
 }
 
 .my-nav_aside {
-    transform: translateX(-110%);
     box-shadow: 0px 0px 0px;
 }
 
@@ -73,14 +73,20 @@ span.my-nav-menu-expanded::before {
     display: none;
 }
 
-@media (min-width: 701px) {
+@media (min-width: 601px) {
     body {
-	width: 700px;
+	width: 600px;
 	margin: 0 auto;
+    }
+    .my-nav_aside {
+	transform: translateX(-105%);
     }
 }
 
-@media (max-width: 700px) {
+@media (max-width: 1150px) {
+    .my-nav_aside {
+	transform: translateY(-120%);
+    }
 }
 
 body {

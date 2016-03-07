@@ -1,9 +1,8 @@
 /* globals ng, Rx */
 'use strict';
 
-let fm = require('front-matter')
-let marked = require('marked')
-
+let post = require('../lib/post')
+let index = require('../lib/index')
 
 let OBD = ng.core.Class({
     constructor: function() {
@@ -30,6 +29,7 @@ let IndexService = ng.core.Class({
 })
 
 let app = {}
+// TODO
 app.LastN = ng.core.Component({
     selector: 'lastn',
     template: `<h1>This is {{foo}} </h1>
@@ -52,6 +52,7 @@ app.LastN = ng.core.Component({
     }
 })
 
+// TODO
 app.Tags = ng.core.Component({
     selector: 'tags',
     template: '<h1>Tags: {{params.id}}</h1>',
@@ -75,18 +76,11 @@ let PostService = ng.core.Class({
 
     html$: function(params) {
 	return this.http.get(this.url(params)).map(res => {
-	    let r = fm(res._body)
-	    return {
-		body: marked(r.body) // FIXME: replace after rendering
-		    .replace( /(<\s*img\s+src=['"])([^'"]+?)/igm,
-			     `$1${params.year}/${params.month}/${params.day}/$2`),
-		url_src: res.url,
-		// FIXME: extract to a lib
-		subject: r.attributes.subject || '(No Subject)',
-		authors: [].concat(r.attributes.authors || 'Anonymous'),
-		tags: [].concat(r.attributes.tags || 'untagged'),
-		time: r.attributes.time
-	    }
+	    let r = post.parse(res._body)
+	    r.body = post.md2html(r._fm.body, params)
+	    r.url_src = res.url
+	    delete r._fm
+	    return r
 	})
     }
 })
@@ -122,58 +116,13 @@ app.Nav = ng.core.Component({
 
 	indser.$src.subscribe((data) => {
 	    console.log('app.Nav: http.get DONE')
-	    this.postproc(data)
+	    index.postproc(data)
 	    this.data = data
 //	    console.log(data)
 	}, (err) => {
 	    obd.err.text = `HTTP ${err.status}: ${indser.url_index} || ${indser.url_meta}`
 	})
     }],
-
-    // modifies data!
-    postproc: function(data) {
-	let authors = []
-	data.index.authors.forEach( (author) => {
-	    authors.push({ name: author, count: 0 })
-	})
-
-	data.index.posts.forEach( (post, idx) => {
-	    post.a.forEach(ai => {
-		authors[ai].count++
-	    })
-	})
-	data.index.authors = authors
-
-	// reorganize posts into a calendar
-	let years = {}
-	data.index.posts.forEach( post => {
-	    if (post.y in years) {
-		years[post.y].push(post)
-	    } else {
-		years[post.y] = [post]
-	    }
-	})
-
-	let calendar = []
-	Object.keys(years).sort().forEach( (year, idx) => {
-	    let months = {}
-	    years[year].forEach( post => {
-		if (post.m in months) {
-		    months[post.m].push(post)
-		} else {
-		    months[post.m] = [post]
-		}
-	    })
-
-	    calendar[idx] = { year }
-	    Object.keys(months).sort().forEach( key => {
-		calendar[idx].months = calendar[idx].months || []
-		calendar[idx].months.push({ month: key, posts: months[key]})
-	    })
-	})
-
-	data.cal = calendar
-    },
 
     toggle_view: function(e) {
 	e.target.classList.toggle('my-nav-menu-expanded')

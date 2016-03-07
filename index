@@ -3,8 +3,9 @@
 'use strict'
 
 let fs = require('fs')
-let fm = require('front-matter')
 let argv = require('minimist')(process.argv.slice(2))
+
+let post = require('./lib/post')
 
 let md_parse = function(file, idx) {
     return new Promise( (resolve, reject) => {
@@ -13,11 +14,12 @@ let md_parse = function(file, idx) {
 		reject(err)
 		return
 	    }
-	    let r = fm(data)
+	    let r = post.parse(data)
 	    resolve({
 		idx: idx,
-		subject: r.attributes.subject || '(No Subject)',
-		authors: [].concat(r.attributes.authors || 'Anonymous')
+		subject: r.subject,
+		authors: r.authors,
+		tags: r.tags
 	    })
 	})
     })

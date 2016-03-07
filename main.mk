@@ -7,7 +7,8 @@ pp-%:
 	@echo "$(strip $($*))" | tr ' ' \\n
 
 NODE_ENV ?= development
-out := $(NODE_ENV)
+out := $(NODE_ENV)/site
+out.tmp := $(NODE_ENV)
 src := $(dir $(realpath $(lastword $(MAKEFILE_LIST))))
 
 DATA := $(src)/test/data/shevchenko
@@ -82,6 +83,19 @@ $(app.static.dest): $(out)/%: $(src)/app/%
 compile: $(app.static.dest)
 
 
+# unconditional compilation
+lib.js.src := $(wildcard $(src)/lib/*.js)
+lib.js.dest := $(patsubst $(src)/%.js, $(out.tmp)/%.js, $(lib.js.src))
+
+$(out.tmp)/%.js: $(src)/%.js
+	$(mkdir)
+	$(babel) --presets es2015 $(BABEL_OPT) $< -o $@
+
+$(lib.js.dest): node_modules.mk
+compile: $(lib.js.dest)
+
+
+# browser-facing javascript
 app.js.src := $(wildcard $(src)/app/*.js)
 app.js.dest.ext := .es5
 ifeq ($(NODE_ENV), development)
@@ -98,6 +112,7 @@ $(out)/%$(app.js.dest.ext): $(src)/app/%.js
 	$(babel) --presets es2015 $(BABEL_OPT) $< -o $@
 
 
+# browserify bundles
 browserify := node_modules/.bin/browserify
 ifeq ($(NODE_ENV), development)
 BROWSERIFY_OPT := -d
@@ -111,9 +126,10 @@ $(bundles.dest): %.browserify$(app.js.dest.ext): %$(app.js.dest.ext)
 	$(mkdir)
 	$(browserify) $(BROWSERIFY_OPT) $< -o $@
 
-$(bundles.dest): node_modules.mk
+$(bundles.dest): node_modules.mk $(lib.js.dest)
 
 
+# the end of the browser-facing javascipt chain
 es6.dest := $(patsubst %.es5, %.js, $(bundles.dest))
 # we need only bundles
 .INTERMEDIATE: $(app.js.dest)

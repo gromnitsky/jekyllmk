@@ -127,8 +127,8 @@ app.Post = ng.core.Component({
 })
 
 app.Nav = ng.core.Component({
-    selector: 'my-nav',
-    templateUrl: 'my-nav.template',
+    selector: 'topmenu',
+    templateUrl: 'topmenu.template',
     directives: [ng.router.ROUTER_DIRECTIVES],
 }).Class({
     constructor: [NavService, function (ns) {
@@ -137,9 +137,9 @@ app.Nav = ng.core.Component({
     }],
 
     plus_or_minus: function(yi, mi) {
-	if (mi === undefined)
-	    return this.cal_item_match_year(yi) ? "my-nav-menu-expanded" : "my-nav-menu-collapsed"
-	return this.cal_item_match_month(yi, mi) ? "my-nav-menu-expanded" : "my-nav-menu-collapsed"
+	let func = this.cal_item_match_month
+	if (mi === undefined) func = this.cal_item_match_year
+	return func.call(this, yi, mi) ? "topmenu-tree_ctrl-expanded" : "topmenu-tree_ctrl-collapsed"
     },
 
     cal_item_match_year: function(yi) {
@@ -161,9 +161,9 @@ app.Nav = ng.core.Component({
     },
 
     toggle_view: function(e) {
-	e.target.classList.toggle('my-nav-menu-expanded')
-	e.target.classList.toggle('my-nav-menu-collapsed')
-	e.target.nextElementSibling.classList.toggle('my-nav-menu_items-collapsed')
+	e.target.classList.toggle('topmenu-tree_ctrl-expanded')
+	e.target.classList.toggle('topmenu-tree_ctrl-collapsed')
+	e.target.nextElementSibling.classList.toggle('topmenu-tree_node-collapsed')
     }
 })
 

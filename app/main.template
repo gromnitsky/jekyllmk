@@ -7,7 +7,7 @@
 
 <div id="obd" *ngIf="obd.err.text">{{obd.err.text}}</div>
 
-<my-nav></my-nav>
+<topmenu></topmenu>
 
 <router-outlet></router-outlet>
 

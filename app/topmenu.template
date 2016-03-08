@@ -1,23 +1,24 @@
 <!-- -*-html-*- -->
 
-<nav class="my-nav" [class.my-nav_aside]="ns.aside">
+<nav class="topmenu" [class.topmenu_aside]="ns.aside">
   <h2>Archive</h2>
 
-  <ul class="my-nav-menu">
+  <ul class="topmenu-tree">
     <li *ngFor="#year of ns?.data?.cal; #yindex = index">
       <span (click)="toggle_view($event)"
 	    class="{{ plus_or_minus(yindex) }}">
       </span>
       {{ year.year }}
 
-      <ul class="my-nav-menu" [class.my-nav-menu_items-collapsed]="!cal_item_match_year(yindex)">
+      <ul class="topmenu-tree"
+	  [class.topmenu-tree_node-collapsed]="!cal_item_match_year(yindex)">
 	<li *ngFor="#month of year.months; #mindex = index">
 	  <span (click)="toggle_view($event)"
 		class="{{ plus_or_minus(yindex, mindex) }}">
 	  </span>
 	  {{ month.month }}
 
-	  <ul [class.my-nav-menu_items-collapsed]="!cal_item_match_month(yindex, mindex)">
+	  <ul [class.topmenu-tree_node-collapsed]="!cal_item_match_month(yindex, mindex)">
 	    <li *ngFor="#post of month.posts; #pindex = index">
 	      <a [routerLink]="['Post', {year: post.y, month: post.m, day: post.d, name: post.n } ]" [class.selected]="cal_item_match(yindex, mindex, pindex)">
 		{{ post.s }}

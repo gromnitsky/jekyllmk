@@ -51,7 +51,7 @@ footer.my-main-footer {
     text-decoration: underline;
 }
 
-.my-nav {
+.topmenu {
     background-color: brown;
     color: whitesmoke;
     padding: 10px;
@@ -61,40 +61,40 @@ footer.my-main-footer {
     width: 230px;
 }
 
-.my-nav a:hover {
+.topmenu a:hover {
     text-decoration: underline;
 }
 
-.my-nav a {
+.topmenu a {
     color: whitesmoke;
     text-decoration: none;
 }
 
-.my-nav_aside {
+.topmenu_aside {
     box-shadow: 0px 0px 0px;
 }
 
-.my-nav > ul.my-nav-menu {
+.topmenu > ul.topmenu-tree {
     padding-left: 0;
 }
 
-.my-nav-menu {
+.topmenu-tree {
     list-style-type: none;
 }
 
-span.my-nav-menu-collapsed::before {
+span.topmenu-tree_ctrl-collapsed::before {
     content: "[+]\a";
 }
 
-span.my-nav-menu-expanded::before {
+span.topmenu-tree_ctrl-expanded::before {
     content: "[-]\a";
 }
 
-.my-nav-menu_items-collapsed {
+.topmenu-tree_node-collapsed {
     display: none;
 }
 
-.my-nav .selected {
+.topmenu .selected {
     color: yellow;
 }
 
@@ -104,13 +104,13 @@ span.my-nav-menu-expanded::before {
 	width: 600px;
 	margin: 0 auto;
     }
-    .my-nav_aside {
+    .topmenu_aside {
 	transform: translateX(-105%);
     }
 }
 
 @media (max-width: 1150px) {
-    .my-nav_aside {
+    .topmenu_aside {
 	transform: translateY(-120%);
     }
 }

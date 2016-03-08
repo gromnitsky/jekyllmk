@@ -1,5 +1,12 @@
 <!-- -*-html-*- -->
 
+<nav class="my-article-nav">
+  <a [class.hidden]="!post_prev"
+     href="{{ post_prev?.url }}" title="{{ post_prev?.subject }}">←</a>
+  <a [class.hidden]="!post_next"
+     href="{{ post_next?.url }}" title="{{ post_next?.subject }}">→</a>
+</nav>
+
 <article class="my-article">
   <header>
     <h2>{{ data?.subject }}</h2>

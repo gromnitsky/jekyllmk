@@ -31,6 +31,7 @@ footer.my-main-footer {
     color: gray;
 }
 
+
 .my-article section > p:first-child:first-letter {
     font-size: x-large;
     /* border: 1px solid red; */
@@ -50,6 +51,23 @@ footer.my-main-footer {
 .my-article a:hover {
     text-decoration: underline;
 }
+
+
+.my-article-nav {
+    font-size: xx-large;
+}
+
+.my-article-nav a {
+    text-decoration: none;
+}
+
+.my-article-nav a:nth-child(1) {
+    margin-right: 2em;
+}
+.my-article-nav .hidden {
+    display: none;
+}
+
 
 .topmenu {
     background-color: brown;

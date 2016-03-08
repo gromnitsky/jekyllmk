@@ -95,7 +95,7 @@ let NavService = ng.core.Class({
 	    console.log('NavService: http.get DONE')
 	    index.postproc(data, data.config.topmenu.treesort)
 	    this.data = data
-	    console.log(data)
+//	    console.log(data)
 	}, (err) => {
 	    obd.err.text = `HTTP ${err.status}: ${indser.url_index} || ${indser.url_config}`
 	})
@@ -114,17 +114,54 @@ app.Post = ng.core.Component({
 	console.log('app.Post')
 	this.router = router;
 	this.params = params.params
+	this.ns = ns
 
 	ps.html$(this.params).subscribe((data) => {
 	    console.log(`app.Post: http.get ${ps.url(this.params)} DONE`)
 	    this.data = data
-	    ns.cal_item = index.find(ns.data.cal, this.params.year, this.params.month, this.params.day, this.params.name)
-//	    console.log(ns.cal_item)
+	    this.ns.cal_item = index.find(ns.data.cal,
+					  this.params.year,
+					  this.params.month,
+					  this.params.day, this.params.name)
+
+	    this.post_prev = this.find_next_url(-1)
+	    this.post_next = this.find_next_url(1)
 	}, (err) => {
 	    obd.err.text = `HTTP ${err.status}: ${ps.url(this.params)}`
 	})
-    }]
+    }],
+
+    find_us: function() {
+	if (!this.ns) return -1
+	let arr = this.ns.data.index.posts
+	for (let idx = 0; idx < arr.length; ++idx) {
+	    if (this.params.year === arr[idx].y &&
+		this.params.month === arr[idx].m &&
+		this.params.day === arr[idx].d &&
+		this.params.name === arr[idx].n)
+		return idx
+	}
+	return -1
+    },
+
+    find_next: function(pos) {
+	let us = this.find_us()
+	return this.ns.data.index.posts[us+pos]
+    },
+
+    find_next_url: function(pos) {
+	let post = this.find_next(pos)
+	if (!post) return null
+	return {
+	    url: `#/${post.y}/${post.m}/${post.d}/${post.n}`,
+	    subject: post.s
+	}
+    }
 })
+
+function isNum(n) {
+    return !isNaN(parseFloat(n)) && isFinite(n);
+}
 
 app.Nav = ng.core.Component({
     selector: 'topmenu',

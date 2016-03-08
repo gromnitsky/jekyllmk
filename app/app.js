@@ -131,10 +131,16 @@ app.Nav = ng.core.Component({
     templateUrl: 'my-nav.template',
     directives: [ng.router.ROUTER_DIRECTIVES],
 }).Class({
-    constructor: [OBD, NavService, function (obd, ns) {
+    constructor: [NavService, function (ns) {
 	console.log('app.Nav')
 	this.ns = ns
     }],
+
+    plus_or_minus: function(yi, mi) {
+	if (mi === undefined)
+	    return this.cal_item_match_year(yi) ? "my-nav-menu-expanded" : "my-nav-menu-collapsed"
+	return this.cal_item_match_month(yi, mi) ? "my-nav-menu-expanded" : "my-nav-menu-collapsed"
+    },
 
     cal_item_match_year: function(yi) {
 	if (!this.ns.cal_item) return false
@@ -168,7 +174,7 @@ app.Main = ng.core.Component({
 }).Class({
     constructor: [OBD, NavService, function (obd, ns) {
 	console.log('app.Main')
-	this.obd = obd
+	this.obd = obd		// template uses it
 	this.ns = ns
     }],
 

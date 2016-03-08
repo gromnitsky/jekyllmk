@@ -6,18 +6,16 @@
   <ul class="my-nav-menu">
     <li *ngFor="#year of ns?.data?.cal; #yindex = index">
       <span (click)="toggle_view($event)"
-	    [class.my-nav-menu-expanded]="cal_item_match_year(yindex)"
-	    [class.my-nav-menu-collapsed]="!cal_item_match_year(yindex)">
-	{{ year.year }}
+	    class="{{ plus_or_minus(yindex) }}">
       </span>
+      {{ year.year }}
 
       <ul class="my-nav-menu" [class.my-nav-menu_items-collapsed]="!cal_item_match_year(yindex)">
 	<li *ngFor="#month of year.months; #mindex = index">
 	  <span (click)="toggle_view($event)"
-		[class.my-nav-menu-expanded]="cal_item_match_month(yindex, mindex)"
-		[class.my-nav-menu-collapsed]="!cal_item_match_month(yindex, mindex)">
-	    {{ month.month }}
+		class="{{ plus_or_minus(yindex, mindex) }}">
 	  </span>
+	  {{ month.month }}
 
 	  <ul [class.my-nav-menu_items-collapsed]="!cal_item_match_month(yindex, mindex)">
 	    <li *ngFor="#post of month.posts; #pindex = index">

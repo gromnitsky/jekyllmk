@@ -15,14 +15,14 @@ let IndexService = ng.core.Class({
     constructor: [ng.http.Http, function(http) {
 	console.log('IndexService: http.get')
 	this.url_index = 'index.json'
-	this.url_meta = 'meta.json'
+	this.url_config = 'config.json'
 
 	let index$ = http.get(this.url_index).map(res => res.json())
-	let meta$ = http.get(this.url_meta).map(res => res.json())
-	this.$src = Rx.Observable.zip(index$, meta$, (index, meta) => {
+	let config$ = http.get(this.url_config).map(res => res.json())
+	this.$src = Rx.Observable.zip(index$, config$, (index, config) => {
 	    return {
 		index,
-		meta
+		config
 	    }
 	})
     }]
@@ -93,11 +93,11 @@ let NavService = ng.core.Class({
 
 	indser.$src.subscribe((data) => {
 	    console.log('NavService: http.get DONE')
-	    index.postproc(data)
+	    index.postproc(data, data.config.topmenu.treesort)
 	    this.data = data
-//	    console.log(data)
+	    console.log(data)
 	}, (err) => {
-	    obd.err.text = `HTTP ${err.status}: ${indser.url_index} || ${indser.url_meta}`
+	    obd.err.text = `HTTP ${err.status}: ${indser.url_index} || ${indser.url_config}`
 	})
 
     }]

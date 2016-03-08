@@ -143,3 +143,12 @@ UGLIFYJS_OPT := --screw-ie8 -m -c
 
 $(es6.dest): node_modules.mk
 compile: $(es6.dest)
+
+
+mocha := node_modules/.bin/mocha
+# for use inside of test scripts
+export MOCHA_OUT := $(out)
+
+.PHONY: test
+test: node_modules
+	$(mocha) -u tdd $(TEST_OPT) $(src)/test/test_*.js

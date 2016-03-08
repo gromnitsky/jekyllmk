@@ -1,6 +1,6 @@
 <!-- -*-html-*- -->
 
-<nav class="my-nav my-nav_aside">
+<nav class="my-nav" [class.my-nav_aside]="ns.aside">
   <h2>Archive</h2>
 
   <ul class="my-nav-menu">

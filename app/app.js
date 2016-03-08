@@ -89,12 +89,13 @@ let NavService = ng.core.Class({
     constructor: [IndexService, OBD, function(indser, obd) {
 	console.log('NavService')
 	this.cal_item = null
+	this.aside = true
 
 	indser.$src.subscribe((data) => {
 	    console.log('NavService: http.get DONE')
 	    index.postproc(data)
 	    this.data = data
-	    console.log(data)
+//	    console.log(data)
 	}, (err) => {
 	    obd.err.text = `HTTP ${err.status}: ${indser.url_index} || ${indser.url_meta}`
 	})
@@ -118,7 +119,7 @@ app.Post = ng.core.Component({
 	    console.log(`app.Post: http.get ${ps.url(this.params)} DONE`)
 	    this.data = data
 	    ns.cal_item = index.find(ns.data.cal, this.params.year, this.params.month, this.params.day, this.params.name)
-	    console.log(ns.cal_item)
+//	    console.log(ns.cal_item)
 	}, (err) => {
 	    obd.err.text = `HTTP ${err.status}: ${ps.url(this.params)}`
 	})
@@ -137,27 +138,23 @@ app.Nav = ng.core.Component({
 
     cal_item_match_year: function(yi) {
 	if (!this.ns.cal_item) return false
-	if (this.ns.cal_item.pyear === yi) return true
-	return false
+	return this.ns.cal_item.pyear === yi
     },
 
     cal_item_match_month: function(yi, mi) {
 	if (!this.ns.cal_item) return false
-	if (this.ns.cal_item.pyear === yi &&
-	    this.ns.cal_item.pmonth === mi) return true
-	return false
+	return (this.ns.cal_item.pyear === yi &&
+		this.ns.cal_item.pmonth === mi)
     },
 
     cal_item_match: function(yi, mi, pi) {
 	if (!this.ns.cal_item) return false
-	if (this.ns.cal_item.pyear === yi &&
-	    this.ns.cal_item.pmonth === mi &&
-	    this.ns.cal_item.ppost === pi) return true
-	return false
+	return (this.ns.cal_item.pyear === yi &&
+		this.ns.cal_item.pmonth === mi &&
+		this.ns.cal_item.ppost === pi)
     },
 
     toggle_view: function(e) {
-	console.log(this.ns.cal_item)
 	e.target.classList.toggle('my-nav-menu-expanded')
 	e.target.classList.toggle('my-nav-menu-collapsed')
 	e.target.nextElementSibling.classList.toggle('my-nav-menu_items-collapsed')
@@ -169,15 +166,14 @@ app.Main = ng.core.Component({
     templateUrl: 'main.template',
     directives: [ng.router.ROUTER_DIRECTIVES, app.Nav],
 }).Class({
-    constructor: [OBD, function (obd) {
+    constructor: [OBD, NavService, function (obd, ns) {
 	console.log('app.Main')
 	this.obd = obd
+	this.ns = ns
     }],
 
     nav_toggle: function() {
-	// how to get a pointer to already created app.Nav instance?
-	// if we use 'providers' we get _another_ app.Nav instance :(
-	document.querySelector('my-nav > nav').classList.toggle('my-nav_aside')
+	this.ns.aside = !this.ns.aside
     }
 })
 

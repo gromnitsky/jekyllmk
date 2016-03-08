@@ -14,9 +14,9 @@ suite('nav', function() {
     setup(function() {
 	let json = JSON.parse(fs.readFileSync([out, 'index.json'].join('/')).toString())
 	let data = {index: json}
-	index.postproc(data)
+	index.postproc(data, "ascending")
 	this.cal = data.cal
-	console.log(util.inspect(this.cal, { showHidden: false, depth: null }))
+//	console.log(util.inspect(this.cal, { showHidden: false, depth: null }))
     })
 
     test('calendar entry find', function() {

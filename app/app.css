@@ -94,6 +94,11 @@ span.my-nav-menu-expanded::before {
     display: none;
 }
 
+.my-nav .selected {
+    color: yellow;
+}
+
+
 @media (min-width: 601px) {
     body {
 	width: 600px;

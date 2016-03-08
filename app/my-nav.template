@@ -4,21 +4,24 @@
   <h2>Archive</h2>
 
   <ul class="my-nav-menu">
-    <li *ngFor="#year of data?.cal">
-      <span (click)="toggle_view($event)" class="my-nav-menu-collapsed">
+    <li *ngFor="#year of ns?.data?.cal; #yindex = index">
+      <span (click)="toggle_view($event)"
+	    [class.my-nav-menu-expanded]="cal_item_match_year(yindex)"
+	    [class.my-nav-menu-collapsed]="!cal_item_match_year(yindex)">
 	{{ year.year }}
       </span>
 
-      <ul class="my-nav-menu my-nav-menu_items-collapsed">
-	<li *ngFor="#month of year.months">
+      <ul class="my-nav-menu" [class.my-nav-menu_items-collapsed]="!cal_item_match_year(yindex)">
+	<li *ngFor="#month of year.months; #mindex = index">
 	  <span (click)="toggle_view($event)"
-		class="my-nav-menu-collapsed">
+		[class.my-nav-menu-expanded]="cal_item_match_month(yindex, mindex)"
+		[class.my-nav-menu-collapsed]="!cal_item_match_month(yindex, mindex)">
 	    {{ month.month }}
 	  </span>
 
-	  <ul class="my-nav-menu_items-collapsed">
-	    <li *ngFor="#post of month.posts">
-	      <a [routerLink]="['Post', {year: post.y, month: post.m, day: post.d, name: post.n } ]">
+	  <ul [class.my-nav-menu_items-collapsed]="!cal_item_match_month(yindex, mindex)">
+	    <li *ngFor="#post of month.posts; #pindex = index">
+	      <a [routerLink]="['Post', {year: post.y, month: post.m, day: post.d, name: post.n } ]" [class.selected]="cal_item_match(yindex, mindex, pindex)">
 		{{ post.s }}
 	      </a>
 	    </li>
@@ -32,6 +35,6 @@
 
   <h2>Authors</h2>
   <ul>
-    <li *ngFor="#idx of data?.index?.authors">{{ idx.name }} ({{ idx.count }})</li>
+    <li *ngFor="#idx of ns?.data?.index?.authors">{{ idx.name }} ({{ idx.count }})</li>
   </ul>
 </nav>

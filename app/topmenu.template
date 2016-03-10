@@ -4,24 +4,25 @@
   <h2>Archive</h2>
 
   <ul class="topmenu-tree">
-    <li *ngFor="#year of ns?.data?.cal; #yindex = index">
+    <li *ngFor="#year of ns?.data?.cal?.kids">
       <span (click)="toggle_view($event)"
-	    class="{{ plus_or_minus(yindex) }}">
+	    class="{{ plus_or_minus(year) }}">
       </span>
-      {{ year.year }}
+      {{ year.name }}
 
       <ul class="topmenu-tree"
-	  [class.topmenu-tree_node-collapsed]="!cal_item_match_year(yindex)">
-	<li *ngFor="#month of year.months; #mindex = index">
+	  [class.topmenu-tree_node-collapsed]="!is_year_match(year)">
+	<li *ngFor="#month of year.kids">
 	  <span (click)="toggle_view($event)"
-		class="{{ plus_or_minus(yindex, mindex) }}">
+		class="{{ plus_or_minus(year, month) }}">
 	  </span>
-	  {{ month.month }}
+	  {{ month.name }}
 
-	  <ul [class.topmenu-tree_node-collapsed]="!cal_item_match_month(yindex, mindex)">
-	    <li *ngFor="#post of month.posts; #pindex = index">
-	      <a [routerLink]="['Post', {year: post.y, month: post.m, day: post.d, name: post.n } ]" [class.selected]="cal_item_match(yindex, mindex, pindex)">
-		{{ post.s }}
+	  <ul [class.topmenu-tree_node-collapsed]="!is_month_match(year, month)">
+	    <li *ngFor="#post of month.kids">
+	      <a [routerLink]="['Post', {year: post.payload.y, month: post.payload.m, day: post.payload.d, name: post.payload.n }]"
+		 [class.selected]="is_selected(post)">
+		{{ post.payload.s }}
 	      </a>
 	    </li>
 	  </ul>
@@ -31,6 +32,7 @@
 
     </li>
   </ul>
+
 
   <h2>Authors</h2>
   <ul>

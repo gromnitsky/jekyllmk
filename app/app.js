@@ -88,7 +88,6 @@ let PostService = ng.core.Class({
 let NavService = ng.core.Class({
     constructor: [IndexService, OBD, function(indser, obd) {
 	console.log('NavService')
-	this.cal_item = null
 	this.aside = true
 
 	indser.$src.subscribe((data) => {
@@ -119,10 +118,9 @@ app.Post = ng.core.Component({
 	ps.html$(this.params).subscribe((data) => {
 	    console.log(`app.Post: http.get ${ps.url(this.params)} DONE`)
 	    this.data = data
-	    this.ns.cal_item = index.find(ns.data.cal,
-					  this.params.year,
-					  this.params.month,
-					  this.params.day, this.params.name)
+	    this.ns.curpost = ns.data.cal
+		.find(this.params.year, this.params.month,
+		      `${this.params.day}-${this.params.name}`)
 
 	    this.post_prev = this.find_next_url(-1)
 	    this.post_next = this.find_next_url(1)
@@ -153,15 +151,12 @@ app.Post = ng.core.Component({
 	let post = this.find_next(pos)
 	if (!post) return null
 	return {
+	    // FIXME
 	    url: `#/${post.y}/${post.m}/${post.d}/${post.n}`,
 	    subject: post.s
 	}
     }
 })
-
-function isNum(n) {
-    return !isNaN(parseFloat(n)) && isFinite(n);
-}
 
 app.Nav = ng.core.Component({
     selector: 'topmenu',
@@ -173,28 +168,28 @@ app.Nav = ng.core.Component({
 	this.ns = ns
     }],
 
-    plus_or_minus: function(yi, mi) {
-	let func = this.cal_item_match_month
-	if (mi === undefined) func = this.cal_item_match_year
-	return func.call(this, yi, mi) ? "topmenu-tree_ctrl-expanded" : "topmenu-tree_ctrl-collapsed"
+    is_selected: function(post) {
+	if (!(this.ns && this.ns.curpost)) return false
+	return this.ns.curpost.payload.y === post.payload.y &&
+	    this.ns.curpost.payload.m === post.payload.m &&
+	    this.ns.curpost.name === post.name
     },
 
-    cal_item_match_year: function(yi) {
-	if (!this.ns.cal_item) return false
-	return this.ns.cal_item.pyear === yi
+    plus_or_minus: function(year, month) {
+	if (!(this.ns && this.ns.curpost)) return "topmenu-tree_ctrl-collapsed"
+	let func = month === undefined ? this.is_year_match : this.is_month_match
+	return func.call(this, year, month) ? "topmenu-tree_ctrl-expanded" : "topmenu-tree_ctrl-collapsed"
     },
 
-    cal_item_match_month: function(yi, mi) {
-	if (!this.ns.cal_item) return false
-	return (this.ns.cal_item.pyear === yi &&
-		this.ns.cal_item.pmonth === mi)
+    is_year_match: function(year) {
+	if (!(this.ns && this.ns.curpost)) return false
+	return year.name === this.ns.curpost.payload.y
     },
 
-    cal_item_match: function(yi, mi, pi) {
-	if (!this.ns.cal_item) return false
-	return (this.ns.cal_item.pyear === yi &&
-		this.ns.cal_item.pmonth === mi &&
-		this.ns.cal_item.ppost === pi)
+    is_month_match: function(year, month) {
+	if (!(this.ns && this.ns.curpost)) return false
+	return year.name === this.ns.curpost.payload.y &&
+	    month.name === this.ns.curpost.payload.m
     },
 
     toggle_view: function(e) {

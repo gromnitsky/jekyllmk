@@ -14,29 +14,8 @@ suite('nav', function() {
     setup(function() {
 	let json = JSON.parse(fs.readFileSync([out, 'index.json'].join('/')).toString())
 	let data = {index: json}
-	index.postproc(data, "ascending")
+	index.postproc(data)
 	this.data = data
-	this.cal = data.cal
-//	console.log(util.inspect(this.cal, { showHidden: false, depth: null }))
-    })
-
-    test('calendar entry find', function() {
-	assert.equal(null, index.find())
-
-	assert.deepStrictEqual({
-	    pyear: 0,
-	    pmonth: 4,
-	    ppost: 0
-	}, index.find(this.cal, '1857', '12', '10', '1'))
-
-	assert.equal(null, index.find(this.cal, '1857', '12', '10', 'omglol'))
-    })
-
-    test('calendar', function() {
-	let cal = index.cal(this.data)
-//	console.log(util.inspect(cal, {depth: null}))
-	assert.equal(2, cal.kids.length)
-	assert.equal(3, cal.kids[0].kids[1].kids.length)
     })
 
     test('tnode sort flat', function() {
@@ -56,12 +35,11 @@ suite('nav', function() {
     })
 
     test('tnode find', function() {
-	let cal = index.cal(this.data)
-	assert.equal(null, cal.find())
-	assert.equal("15-2", cal.find('1857', '08', '15-2').name)
-	assert.equal("13-1", cal.find('1858', '07', '13-1').name)
-	assert.equal("12-1", cal.find('1857', '06', '12-1').name)
-	assert.equal(null, cal.find('1858', '07', 'omglol'))
+	assert.equal(null, this.data.cal.find())
+	assert.equal("15-2", this.data.cal.find('1857', '08', '15-2').name)
+	assert.equal("13-1", this.data.cal.find('1858', '07', '13-1').name)
+	assert.equal("12-1", this.data.cal.find('1857', '06', '12-1').name)
+	assert.equal(null, this.data.cal.find('1858', '07', 'omglol'))
     })
 
 })

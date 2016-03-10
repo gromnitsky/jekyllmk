@@ -150,5 +150,5 @@ mocha := node_modules/.bin/mocha
 export MOCHA_OUT := $(out)
 
 .PHONY: test
-test: node_modules
+test: node_modules.mk
 	$(mocha) -u tdd $(TEST_OPT) $(src)/test/test_*.js

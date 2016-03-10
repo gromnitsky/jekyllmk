@@ -11,14 +11,14 @@
       {{ year.name }}
 
       <ul class="topmenu-tree"
-	  [class.topmenu-tree_node-collapsed]="!is_year_match(year)">
+	  [class.topmenu-tree_node-collapsed]="!ns?.curpost?.ascendant_of(year)">
 	<li *ngFor="#month of year.kids">
 	  <span (click)="toggle_view($event)"
-		class="{{ plus_or_minus(year, month) }}">
+		class="{{ plus_or_minus(month) }}">
 	  </span>
 	  {{ month.name }}
 
-	  <ul [class.topmenu-tree_node-collapsed]="!is_month_match(year, month)">
+	  <ul [class.topmenu-tree_node-collapsed]="!ns?.curpost?.ascendant_of(month)">
 	    <li *ngFor="#post of month.kids">
 	      <a [routerLink]="['Post', {year: post.payload.y, month: post.payload.m, day: post.payload.d, name: post.payload.n }]"
 		 [class.selected]="is_selected(post)">

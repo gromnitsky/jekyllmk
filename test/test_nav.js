@@ -42,4 +42,14 @@ suite('nav', function() {
 	assert.equal(null, this.data.cal.find('1858', '07', 'omglol'))
     })
 
+    test('tnode find', function() {
+	let leaf1 = this.data.cal.find('1857', '08', '15-1')
+	let leaf2 = this.data.cal.find('1857', '08', '15-2')
+	let leaf3 = this.data.cal.find('1857')
+	let leaf4 = this.data.cal.find('1858')
+
+	assert(leaf2.ascendant_of(leaf3))
+	assert.equal(false, leaf1.ascendant_of(leaf2))
+	assert.equal(false, leaf1.ascendant_of(leaf4))
+    })
 })

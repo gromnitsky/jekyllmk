@@ -175,21 +175,9 @@ app.Nav = ng.core.Component({
 	    this.ns.curpost.name === post.name
     },
 
-    plus_or_minus: function(year, month) {
+    plus_or_minus: function(tnode) {
 	if (!(this.ns && this.ns.curpost)) return "topmenu-tree_ctrl-collapsed"
-	let func = month === undefined ? this.is_year_match : this.is_month_match
-	return func.call(this, year, month) ? "topmenu-tree_ctrl-expanded" : "topmenu-tree_ctrl-collapsed"
-    },
-
-    is_year_match: function(year) {
-	if (!(this.ns && this.ns.curpost)) return false
-	return year.name === this.ns.curpost.payload.y
-    },
-
-    is_month_match: function(year, month) {
-	if (!(this.ns && this.ns.curpost)) return false
-	return year.name === this.ns.curpost.payload.y &&
-	    month.name === this.ns.curpost.payload.m
+	return this.ns.curpost.ascendant_of(tnode) ? "topmenu-tree_ctrl-expanded" : "topmenu-tree_ctrl-collapsed"
     },
 
     toggle_view: function(e) {

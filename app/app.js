@@ -72,7 +72,7 @@ let NavService = ng.core.Class({
 
     clean: function() {
 	this.obd.clean()
-	if (this.ns) this.ns.curpost = null
+	this.curpost = null
     }
 })
 
@@ -111,13 +111,21 @@ app.LastN = ng.core.Component({
 // TODO
 app.Tags = ng.core.Component({
     selector: 'tags',
-    template: '<h1>Tags: {{params.id}}</h1>',
+    templateUrl: 'tags.template',
 }).Class({
     constructor:
-    [ng.router.Router, ng.router.RouteParams, function (router, params) {
+    [ng.router.Router, ng.router.RouteParams, NavService, function (router, params, ns) {
 	this.router = router
 	this.params = params.params
-    }]
+	this.ns = ns
+	this.query = this.params.list
+
+	this.ns.clean()
+    }],
+
+    on_submit: function() {
+	console.log(this.query)
+    }
 })
 
 app.Post = ng.core.Component({
@@ -226,7 +234,7 @@ app.Main = ng.core.Component({
 
 app.Main = ng.router.RouteConfig([
     { path: '/', component: app.LastN, name: 'LastN', useAsDefault: true },
-    { path: '/tags/:id', component: app.Tags, name: 'Tags' },
+    { path: '/tags/:list', component: app.Tags, name: 'Tags' },
     { path: '/:year/:month/:day/:name', component: app.Post, name: 'Post' },
     { path: '/**', redirectTo: ['LastN'] }
 ])(app.Main)

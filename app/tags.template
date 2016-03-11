@@ -1,0 +1,34 @@
+<!-- -*-html-*- -->
+
+<h2>Tags Search</h2>
+
+<form class="my-tags-form" (ngSubmit)="on_submit()">
+  <p>
+    <label>
+
+      <div class="my-tags-help">
+	<div>
+	  Grammar (ABNF)
+	  <pre>query = list
+list = tag *(separator tag)
+tag = [op] name
+op = "-"
+name = 1*(ALPHA / DIGIT / "_" / SP)
+separator = ","</pre>
+
+	  where "," means <code>AND</code>, "-" means <code>NOT</code>.
+	</div>
+
+	<div>
+	  Examples
+	  <pre>Тарас Шевченко,-image</pre>
+	</div>
+      </div>
+
+      <input type="text" spellCheck="false" required
+	     [(ngModel)]="query">
+    </label>
+
+    <input type="submit">
+  </p>
+</form>

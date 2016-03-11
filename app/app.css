@@ -116,6 +116,26 @@ span.topmenu-tree_ctrl-expanded::before {
     color: yellow;
 }
 
+.my-tags-form input[type="text"] {
+    width: 50%;
+}
+
+.my-tags-help {
+    display: flex;
+    margin-bottom: 1em;
+}
+
+.my-tags-help pre {
+    padding: 2px;
+}
+
+.my-tags-help div:first-child {
+    padding-right: 1em;
+}
+
+.my-tags-help div {
+    flex-basis: 50%;
+}
 
 @media (min-width: 601px) {
     body {
@@ -137,9 +157,14 @@ body {
     font-family: Georgia, serif;
 }
 
+code {
+    background-color: #fafafa;
+}
+
 pre {
     padding: 2px 2px 2px 1em;
     word-wrap: break-word;
+    background-color: #fafafa;
 }
 
 .img-responsive {

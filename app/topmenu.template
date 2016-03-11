@@ -38,4 +38,10 @@
   <ul>
     <li *ngFor="#idx of ns?.data?.index?.authors">{{ idx.name }} ({{ idx.count }})</li>
   </ul>
+
+  <h2>Tags</h2>
+  <ul>
+    <li *ngFor="#idx of ns?.data?.index?.tags">{{ idx.name }} ({{ idx.count }})</li>
+  </ul>
+
 </nav>

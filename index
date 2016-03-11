@@ -33,7 +33,8 @@ if (!argv._.length) {
 
 let index = {
     "posts": [],
-    "authors": []
+    "authors": [],
+    "tags": []
 }
 let parsed = []
 let files = argv._.sort()
@@ -53,6 +54,10 @@ files.forEach( (file, idx) => {
 		if (-1 === index.authors.indexOf(ar))
 		    index.authors.push(ar)
 	    })
+	    meta.tags.forEach( (at) => {
+		if (-1 === index.tags.indexOf(at))
+		    index.tags.push(at)
+	    })
 
 	    index.posts[meta.idx] = {
 		n: m[4],
@@ -62,6 +67,9 @@ files.forEach( (file, idx) => {
 		s: meta.subject,
 		a: meta.authors.map( (name) => {
 		    return index.authors.indexOf(name)
+		}),
+		t: meta.tags.map( (name) => {
+		    return index.tags.indexOf(name)
 		})
 	    }
 	})

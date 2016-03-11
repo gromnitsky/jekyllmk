@@ -8,6 +8,10 @@ let OBD = ng.core.Class({
     constructor: function() {
 	this.err = {}
 	this.err.text = null
+    },
+
+    clean: function() {
+	this.err.text = null
     }
 })
 
@@ -25,42 +29,6 @@ let IndexService = ng.core.Class({
 		config
 	    }
 	})
-    }]
-})
-
-let app = {}
-// TODO
-app.LastN = ng.core.Component({
-    selector: 'lastn',
-    template: `<h1>This is {{foo}} </h1>
-
-<ul>
-<li *ngFor="#idx of names">{{idx}}</li>
-</ul>
-
-<button (click)="hello()">hello</button>
-`
-}).Class({
-    constructor: [ng.router.Router, IndexService, function (router, index) {
-	this.router = router
-	this.index = index
-	this.foo = "bar"
-	this.names = ["one", "two", "three"]
-    }],
-    hello: function () {
-	this.router.navigate(['/Tags', {id: 'untagged'}])
-    }
-})
-
-// TODO
-app.Tags = ng.core.Component({
-    selector: 'tags',
-    template: '<h1>Tags: {{params.id}}</h1>',
-}).Class({
-    constructor:
-    [ng.router.Router, ng.router.RouteParams, function (router, params) {
-	this.router = router
-	this.params = params.params
     }]
 })
 
@@ -89,6 +57,7 @@ let NavService = ng.core.Class({
     constructor: [IndexService, OBD, function(indser, obd) {
 	console.log('NavService')
 	this.aside = true
+	this.obd = obd
 
 	indser.$src.subscribe((data) => {
 	    console.log('NavService: http.get DONE')
@@ -99,6 +68,55 @@ let NavService = ng.core.Class({
 	    obd.err.text = `HTTP ${err.status}: ${indser.url_index} || ${indser.url_config}`
 	})
 
+    }],
+
+    clean: function() {
+	this.obd.clean()
+	if (this.ns) this.ns.curpost = null
+    }
+})
+
+
+let app = {}
+
+// TODO
+app.LastN = ng.core.Component({
+    selector: 'lastn',
+    template: `<h1>This is {{foo}} </h1>
+
+<ul>
+<li *ngFor="#idx of names">{{idx}}</li>
+</ul>
+
+<button (click)="hello()">hello</button>
+`
+}).Class({
+    constructor: [ng.router.Router, IndexService, NavService, function (router, index, ns) {
+	this.router = router
+	this.index = index
+	this.ns = ns
+
+	this.ns.clean()
+
+	this.foo = "bar"
+	this.names = ["one", "two", "three"]
+
+    }],
+
+    hello: function () {
+	this.router.navigate(['/Tags', {id: 'untagged'}])
+    }
+})
+
+// TODO
+app.Tags = ng.core.Component({
+    selector: 'tags',
+    template: '<h1>Tags: {{params.id}}</h1>',
+}).Class({
+    constructor:
+    [ng.router.Router, ng.router.RouteParams, function (router, params) {
+	this.router = router
+	this.params = params.params
     }]
 })
 
@@ -111,9 +129,12 @@ app.Post = ng.core.Component({
     constructor:
     [ng.router.Router, ng.router.RouteParams, PostService, OBD, NavService, function (router, params, ps, obd, ns) {
 	console.log('app.Post')
-	this.router = router;
+	this.router = router
 	this.params = params.params
 	this.ns = ns
+	this.obd = obd
+
+	this.ns.clean()
 
 	ps.html$(this.params).subscribe((data) => {
 	    console.log(`app.Post: http.get ${ps.url(this.params)} DONE`)
@@ -206,7 +227,8 @@ app.Main = ng.core.Component({
 app.Main = ng.router.RouteConfig([
     { path: '/', component: app.LastN, name: 'LastN', useAsDefault: true },
     { path: '/tags/:id', component: app.Tags, name: 'Tags' },
-    { path: '/:year/:month/:day/:name', component: app.Post, name: 'Post' }
+    { path: '/:year/:month/:day/:name', component: app.Post, name: 'Post' },
+    { path: '/**', redirectTo: ['LastN'] }
 ])(app.Main)
 
 

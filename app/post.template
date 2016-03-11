@@ -11,7 +11,10 @@
   <header>
     <h2>{{ data?.subject }}</h2>
     <p>
-      {{ data?.authors?.join(", ") }}<br>
+      <span *ngFor="#name of data?.authors; #last = last">
+	<a [routerLink]="['Tags', {list: name }]">{{ name }}</a><span *ngIf="!last">,</span>
+      </span>
+      <br>
       <time>
 	{{ params.year }}-{{ params.month }}-{{ params.day }}
 	{{ data?.time }}
@@ -20,12 +23,16 @@
   </header>
 
   <section>
-      <p [innerHTML]="data?.body"></p>
+    <p [innerHTML]="data?.body"></p>
   </section>
 
   <footer>
     <p>
-      Tags: {{ data?.tags?.join(", ") }}<br>
+      Tags:
+      <span *ngFor="#name of data?.tags; #last = last">
+	<a [routerLink]="['Tags', {list: name }]">{{ name }}</a><span *ngIf="!last">,</span>
+      </span>
+      <br>
       <a href="{{ data?.url_src }}" target="_blank">Source</a>
     </p>
   </footer>

@@ -15,7 +15,7 @@ suite('tags', function() {
     setup(function() {
 	let json = JSON.parse(fs.readFileSync([out, 'index.json'].join('/')).toString())
 	let data = {index: json}
-//	index.postproc(data)
+	index.postproc(data)
 	this.data = data
     })
 
@@ -32,4 +32,15 @@ suite('tags', function() {
 			 tags.parse_query(" 1  2, -3  4  "))
     })
 
+    test('match_exact', function() {
+	assert.deepEqual([6,9], tags.match_exact(this.data, "image"))
+	assert.deepEqual([4], tags.match_exact(this.data, "Tomasz Zbrożek"))
+	assert.deepEqual([3,4], tags.match_exact(this.data, "Федор Чельцов,Tomasz Zbrożek"))
+	assert.deepEqual([3], tags.match_exact(this.data, "Федор Чельцов, -Tomasz Zbrożek"))
+
+	let r1 = tags.match_exact(this.data, "Тарас Шевченко")
+	let r2 = tags.match_exact(this.data, "Тарас Шевченко, -image")
+	assert.equal(9, r1.length)
+	assert.equal(7, r2.length)
+    })
 })

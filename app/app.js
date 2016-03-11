@@ -3,6 +3,7 @@
 
 let post = require('../lib/post')
 let index = require('../lib/index')
+let tags = require('../lib/tags')
 
 let OBD = ng.core.Class({
     constructor: function() {
@@ -108,23 +109,28 @@ app.LastN = ng.core.Component({
     }
 })
 
-// TODO
 app.Tags = ng.core.Component({
     selector: 'tags',
     templateUrl: 'tags.template',
+    directives: [ng.router.ROUTER_DIRECTIVES],
 }).Class({
     constructor:
     [ng.router.Router, ng.router.RouteParams, NavService, function (router, params, ns) {
+	console.log("app.Tags")
 	this.router = router
 	this.params = params.params
 	this.ns = ns
 	this.query = this.params.list
+	this.result = []
 
 	this.ns.clean()
+	this.on_submit()
     }],
 
     on_submit: function() {
-	console.log(this.query)
+	console.log("app.Tags: on_submit")
+	let r = tags.match_exact(this.ns.data, this.query)
+	this.result = this.ns.data.config.topmenu.treesort === "descending" ? r.reverse() : r
     }
 })
 

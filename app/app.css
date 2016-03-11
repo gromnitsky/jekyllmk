@@ -117,12 +117,12 @@ span.topmenu-tree_ctrl-expanded::before {
 }
 
 .my-tags-form input[type="text"] {
-    width: 50%;
+    width: 80%;
 }
 
 .my-tags-help {
     display: flex;
-    margin-bottom: 1em;
+    flex-wrap: wrap;
 }
 
 .my-tags-help pre {
@@ -130,11 +130,12 @@ span.topmenu-tree_ctrl-expanded::before {
 }
 
 .my-tags-help div:first-child {
-    padding-right: 1em;
 }
 
 .my-tags-help div {
-    flex-basis: 50%;
+    flex-grow: 1;
+    padding-left: 0.5em;
+    padding-bottom: 1em;
 }
 
 @media (min-width: 601px) {

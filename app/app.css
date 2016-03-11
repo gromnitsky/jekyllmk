@@ -62,7 +62,7 @@ footer.my-main-footer {
 }
 
 .my-article-nav a:nth-child(1) {
-    margin-right: 2em;
+    margin-right: 1em;
 }
 .my-article-nav .hidden {
     display: none;

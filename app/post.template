@@ -2,16 +2,16 @@
 
 <nav class="my-article-nav">
   <a [class.hidden]="!post_prev"
-     href="{{ post_prev?.url }}" title="{{ post_prev?.subject }}">←</a>
+     href="{{ post_prev?.url }}" title="{{ post_prev?.subject }}">&lArr;</a>
   <a [class.hidden]="!post_next"
-     href="{{ post_next?.url }}" title="{{ post_next?.subject }}">→</a>
+     href="{{ post_next?.url }}" title="{{ post_next?.subject }}">&rArr;</a>
 </nav>
 
 <article class="my-article">
   <header>
     <h2>{{ data?.subject }}</h2>
     <p>
-      Authors: {{ data?.authors?.join(", ") }}<br>
+      {{ data?.authors?.join(", ") }}<br>
       <time>
 	{{ params.year }}-{{ params.month }}-{{ params.day }}
 	{{ data?.time }}

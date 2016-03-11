@@ -115,15 +115,17 @@ app.Tags = ng.core.Component({
     directives: [ng.router.ROUTER_DIRECTIVES],
 }).Class({
     constructor:
-    [ng.router.Router, ng.router.RouteParams, NavService, function (router, params, ns) {
+    [ng.router.Router, ng.router.RouteParams, ng.router.Location, NavService, function (router, params, location, ns) {
 	console.log("app.Tags")
 	this.router = router
 	this.params = params.params
+	this.location = location
 	this.ns = ns
 	this.query = this.params.list
 	this.result = []
 
 	this.ns.clean()
+	this._first = true
 	this.on_submit()
     }],
 
@@ -131,6 +133,9 @@ app.Tags = ng.core.Component({
 	console.log("app.Tags: on_submit")
 	let r = tags.match_exact(this.ns.data, this.query)
 	this.result = this.ns.data.config.topmenu.treesort === "descending" ? r.reverse() : r
+	// should work w/o triggering the router
+	if (!this._first) this.location.replaceState(`/tags/${this.query}`)
+	this._first = false
     }
 })
 

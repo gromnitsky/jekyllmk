@@ -7,7 +7,7 @@
      href="{{ post_next?.url }}" title="{{ post_next?.subject }}">&rArr;</a>
 </nav>
 
-<article class="my-article">
+<article class="my-article" *ngIf="data">
   <header>
     <h2>{{ data?.subject }}</h2>
     <p>

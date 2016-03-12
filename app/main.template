@@ -2,7 +2,7 @@
 
 <header class="my-main-header">
   <div><button (click)="nav_toggle()">&Xi;</button></div>
-  <h1>TODO: title</h1>
+  <h1><a [routerLink]="['LastN']">{{ ns?.data?.config?.title }}</a></h1>
 </header>
 
 <div id="obd" *ngIf="obd.err.text">{{obd.err.text}}</div>

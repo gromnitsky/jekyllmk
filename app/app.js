@@ -60,10 +60,15 @@ let NavService = ng.core.Class({
 	this.aside = true
 	this.obd = obd
 
+	this.data$ = new Rx.Subject()
+
 	indser.$src.subscribe((data) => {
 	    console.log('NavService: http.get DONE')
 	    index.postproc(data, data.config.topmenu.treesort)
 	    this.data = data
+
+	    this.data$.next(data)
+	    this.data$.complete()
 //	    console.log(data)
 	}, (err) => {
 	    obd.err.text = `HTTP ${err.status}: ${indser.url_index} || ${indser.url_config}`
@@ -80,32 +85,33 @@ let NavService = ng.core.Class({
 
 let app = {}
 
-// TODO
+// Detect the latest post & make a redirect to it
 app.LastN = ng.core.Component({
     selector: 'lastn',
-    template: `<h1>This is {{foo}} </h1>
-
-<ul>
-<li *ngFor="#idx of names">{{idx}}</li>
-</ul>
-
-<button (click)="hello()">hello</button>
-`
+    template: '<p>Wait please...</p>'
 }).Class({
-    constructor: [ng.router.Router, IndexService, NavService, function (router, index, ns) {
+    constructor:
+    [ng.router.Router, NavService, OBD, function (router, ns, obd) {
+	console.log("app.LastN")
 	this.router = router
-	this.index = index
 	this.ns = ns
 
-	this.ns.clean()
-
-	this.foo = "bar"
-	this.names = ["one", "two", "three"]
-
+	if (this.ns.data) {
+	    console.log('app.LastN: redirect')
+	    this.redirect(this.ns.data)
+	} else {
+	    ns.data$.subscribe((data) => {
+		console.log('app.LastN: ns.data$.subscribe')
+		this.redirect(data)
+	    }, (err) => {
+		obd.err.text = "Failed to detect the latest post."
+	    })
+	}
     }],
 
-    hello: function () {
-	this.router.navigate(['/Tags', {id: 'untagged'}])
+    redirect: function(data) {
+	let post = data.index.posts[0]
+	this.router.navigate(['/Post', {year: post.y, month: post.m, day: post.d, name: post.n }])
     }
 })
 
@@ -115,12 +121,13 @@ app.Tags = ng.core.Component({
     directives: [ng.router.ROUTER_DIRECTIVES],
 }).Class({
     constructor:
-    [ng.router.Router, ng.router.RouteParams, ng.router.Location, NavService, function (router, params, location, ns) {
+    [ng.router.Router, ng.router.RouteParams, ng.router.Location, NavService, ng.platform.browser.Title, function (router, params, location, ns, title) {
 	console.log("app.Tags")
 	this.router = router
 	this.params = params.params
 	this.location = location
 	this.ns = ns
+	this.title = title
 	this.query = this.params.list
 	this.result = []
 
@@ -131,6 +138,8 @@ app.Tags = ng.core.Component({
 
     on_submit: function() {
 	console.log("app.Tags: on_submit")
+	this.title.setTitle(`${this.ns.data.config.title} :: Tags :: ${this.query}`)
+
 	let r = tags.match_exact(this.ns.data, this.query)
 	this.result = this.ns.data.config.topmenu.treesort === "descending" ? r.reverse() : r
 	// should work w/o triggering the router
@@ -146,12 +155,13 @@ app.Post = ng.core.Component({
     providers: [PostService]
 }).Class({
     constructor:
-    [ng.router.Router, ng.router.RouteParams, PostService, OBD, NavService, function (router, params, ps, obd, ns) {
+    [ng.router.Router, ng.router.RouteParams, PostService, OBD, NavService, ng.platform.browser.Title, function (router, params, ps, obd, ns, title) {
 	console.log('app.Post')
 	this.router = router
 	this.params = params.params
 	this.ns = ns
 	this.obd = obd
+	this.title = title
 
 	this.ns.clean()
 
@@ -162,6 +172,7 @@ app.Post = ng.core.Component({
 		.find(this.params.year, this.params.month,
 		      `${this.params.day}-${this.params.name}`)
 
+	    this.title.setTitle(`${this.ns.data.config.title} :: ${['y', 'm', 'd'].map(val => this.ns.curpost.payload[val]).join('/')} :: ${this.ns.curpost.payload.s}`)
 	    this.post_prev = this.find_next_url(-1)
 	    this.post_next = this.find_next_url(1)
 	}, (err) => {
@@ -262,6 +273,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
 	    ng.router.ROUTER_PROVIDERS,
 	    ng.core.provide(ng.router.LocationStrategy,
-			    { useClass: ng.router.HashLocationStrategy })
+			    { useClass: ng.router.HashLocationStrategy }),
+	    ng.platform.browser.Title
 	])
 })

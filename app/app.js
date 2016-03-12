@@ -60,7 +60,7 @@ let NavService = ng.core.Class({
 	this.aside = true
 	this.obd = obd
 
-	this.data$ = new Rx.Subject()
+	this.data$ = new Rx.AsyncSubject()
 
 	indser.$src.subscribe((data) => {
 	    console.log('NavService: http.get DONE')
@@ -96,17 +96,12 @@ app.LastN = ng.core.Component({
 	this.router = router
 	this.ns = ns
 
-	if (this.ns.data) {
-	    console.log('app.LastN: redirect')
-	    this.redirect(this.ns.data)
-	} else {
-	    ns.data$.subscribe((data) => {
-		console.log('app.LastN: ns.data$.subscribe')
-		this.redirect(data)
-	    }, (err) => {
-		obd.err.text = "Failed to detect the latest post."
-	    })
-	}
+	ns.data$.subscribe((data) => {
+	    console.log('app.LastN: ns.data$.subscribe')
+	    this.redirect(data)
+	}, (err) => {
+	    obd.err.text = "Failed to detect the latest post."
+	})
     }],
 
     redirect: function(data) {

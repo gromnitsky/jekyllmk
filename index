@@ -7,7 +7,7 @@ let argv = require('minimist')(process.argv.slice(2))
 
 let post = require('./lib/post')
 
-let md_parse = function(file, idx) {
+let md_parse = function(file, idx, cal) {
     return new Promise( (resolve, reject) => {
 	fs.readFile(file, 'utf8', (err, data) => {
 	    if (err) {
@@ -16,6 +16,7 @@ let md_parse = function(file, idx) {
 	    }
 	    let r = post.parse(data)
 	    resolve({
+		cal: cal,
 		idx: idx,
 		subject: r.subject,
 		authors: r.authors,
@@ -34,53 +35,78 @@ if (!argv._.length) {
 let index = {
     "posts": [],
     "authors": [],
-    "tags": []
+    "tags": [],
+    "pages": []
 }
-let parsed = []
+let parsed = {
+    promises: [],
+    posts_files_ignored: 0,
+    pages_files_ignored: 0
+}
 let files = argv._.sort()
-let files_ignored = 0
 
 files.forEach( (file, idx) => {
+    // posts
     let m = file.match(/(\d{4})\/(\d{2})\/(\d{2})\/(.+).md$/)
     if (!m) {
-	if (argv.v) console.error(`ignoring ${file}`)
-	files_ignored++
-	return
+	parsed.posts_files_ignored++
+    } else {
+	if (argv.v) console.error(`post: ${file}`)
+	let promise = md_parse(file, idx - parsed.posts_files_ignored, m)
+	    .then( (meta) => {
+		meta.authors.forEach( (ar) => {
+		    if (-1 === index.authors.indexOf(ar))
+			index.authors.push(ar)
+		})
+		meta.tags.forEach( (at) => {
+		    if (-1 === index.tags.indexOf(at))
+			index.tags.push(at)
+		})
+
+		index.posts[meta.idx] = {
+		    n: meta.cal[4],
+		    y: meta.cal[1],
+		    m: meta.cal[2],
+		    d: meta.cal[3],
+		    s: meta.subject,
+		    a: meta.authors.map( (name) => {
+			return index.authors.indexOf(name)
+		    }),
+		    t: meta.tags.map( (name) => {
+			return index.tags.indexOf(name)
+		    })
+		}
+	    })
+	    .catch((err) => {
+		console.error(err.message)
+		process.exit(1)
+	    })
+
+	parsed.promises.push(promise)
     }
 
-    let promise = md_parse(file, idx - files_ignored)
-	.then( (meta) => {
-	    meta.authors.forEach( (ar) => {
-		if (-1 === index.authors.indexOf(ar))
-		    index.authors.push(ar)
+    // pages
+    m = file.match(/p\/(.+)\.md$/)
+    if (!m) {
+	parsed.pages_files_ignored++
+    } else {
+	if (argv.v) console.error(`page: ${file}`)
+	let promise = md_parse(file, idx - parsed.pages_files_ignored, m)
+	    .then( (meta) => {
+		index.pages[meta.idx] = {
+		    n: meta.cal[1],
+		    s: meta.subject,
+		}
 	    })
-	    meta.tags.forEach( (at) => {
-		if (-1 === index.tags.indexOf(at))
-		    index.tags.push(at)
+	    .catch((err) => {
+		console.error(err.message)
+		process.exit(1)
 	    })
 
-	    index.posts[meta.idx] = {
-		n: m[4],
-		y: m[1],
-		m: m[2],
-		d: m[3],
-		s: meta.subject,
-		a: meta.authors.map( (name) => {
-		    return index.authors.indexOf(name)
-		}),
-		t: meta.tags.map( (name) => {
-		    return index.tags.indexOf(name)
-		})
-	    }
-	})
-	.catch((err) => {
-	    console.error(err.message)
-	    process.exit(1)
-	})
-
-    parsed.push(promise)
+	parsed.promises.push(promise)
+    }
 })
 
-Promise.all(parsed).then( ()=> {
+Promise.all(parsed.promises).then( ()=> {
     process.stdout.write(JSON.stringify(index))
 })

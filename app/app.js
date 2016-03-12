@@ -46,7 +46,8 @@ let PostService = ng.core.Class({
     html$: function(params) {
 	return this.http.get(this.url(params)).map(res => {
 	    let r = post.parse(res._body)
-	    r.body = post.md2html(r._fm.body, params)
+	    let url_prefix = `${params.year}/${params.month}/${params.day}`
+	    r.body = post.md2html(r._fm.body, url_prefix)
 	    r.url_src = res.url
 	    delete r._fm
 	    return r
@@ -81,6 +82,30 @@ let NavService = ng.core.Class({
 	this.curpost = null
     }
 })
+
+let PageService = ng.core.Class({
+    constructor: [ng.http.Http, function(http) {
+	console.log('PageService')
+	this.http = http
+    }],
+
+    url: function(params) {
+	return `p/${params.name}.md`
+    },
+
+    html$: function(params) {
+	return this.http.get(this.url(params)).map(res => {
+	    let r = post.parse(res._body)
+	    // basename
+	    let url_prefix = `p/${params.name.replace(/\/[^\/]+$/, '')}`
+	    r.body = post.md2html(r._fm.body, url_prefix)
+	    r.url_src = res.url
+	    delete r._fm
+	    return r
+	})
+    }
+})
+
 
 
 let app = {}
@@ -204,6 +229,34 @@ app.Post = ng.core.Component({
     }
 })
 
+app.Page = ng.core.Component({
+    selector: 'page',
+    templateUrl: 'page.template',
+    directives: [ng.router.ROUTER_DIRECTIVES],
+    providers: [PageService]
+}).Class({
+    constructor:
+    [ng.router.Router, ng.router.RouteParams, PageService, OBD, NavService, ng.platform.browser.Title, function (router, params, ps, obd, ns, title) {
+	console.log('app.Page')
+	this.router = router
+	this.params = params.params
+	this.ns = ns
+	this.obd = obd
+	this.title = title
+
+	this.ns.clean()
+
+	ps.html$(this.params).subscribe((data) => {
+	    console.log(`app.Page: http.get ${ps.url(this.params)} DONE`)
+	    this.data = data
+
+	    this.title.setTitle(`${this.ns.data.config.title} :: ${data.subject}`)
+	}, (err) => {
+	    obd.err.text = `HTTP ${err.status}: ${ps.url(this.params)}`
+	})
+    }]
+})
+
 app.Nav = ng.core.Component({
     selector: 'topmenu',
     templateUrl: 'topmenu.template',
@@ -249,11 +302,30 @@ app.Main = ng.core.Component({
     }
 })
 
+app.RouteError = ng.core.Component({
+    selector: 'route-error',
+    template: `<h2>Invalid route</h2><p>{{ insult }}</p>`,
+}).Class({
+    constructor: [OBD, function(obd) {
+	console.log('app.RouteError')
+	obd.clean()
+	let horrible_insults = [
+	    "Calling you stupid is an insult to stupid people.",
+	    "Your dreams may not come true.",
+	    "You're weak.",
+	    "You're the worst hacker ever.",
+	]
+	// 50% (not really) chance of displaying
+	this.insult = horrible_insults[Math.floor(Math.random() * 2 * horrible_insults.length + 1)]
+    }]
+})
+
 app.Main = ng.router.RouteConfig([
     { path: '/', component: app.LastN, name: 'LastN', useAsDefault: true },
     { path: '/tags/:list', component: app.Tags, name: 'Tags' },
     { path: '/:year/:month/:day/:name', component: app.Post, name: 'Post' },
-    { path: '/**', redirectTo: ['LastN'] }
+    { path: '/p/*name', component: app.Page, name: 'Page' },
+    { path: '/**', component: app.RouteError, name: 'RouteError' }
 ])(app.Main)
 
 

@@ -1,6 +1,15 @@
 <!-- -*-html-*- -->
 
 <nav class="topmenu" [class.topmenu_aside]="ns.aside">
+  <div *ngIf="ns?.about">
+    <p>
+      <a [routerLink]="['Page', {name: ns?.about?.n}]"
+	 [class.selected]="ns?.about?.n == ns?.curpage">
+	{{ ns?.about?.s }}
+      </a>
+    </p>
+  </div>
+
   <h2>Archive</h2>
 
   <ul class="topmenu-tree">

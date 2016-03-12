@@ -65,6 +65,7 @@ let NavService = ng.core.Class({
 
 	indser.$src.subscribe((data) => {
 	    console.log('NavService: http.get DONE')
+	    this.about = this.find_about_page(data)
 	    index.postproc(data, data.config.topmenu.treesort)
 	    this.data = data
 
@@ -77,9 +78,17 @@ let NavService = ng.core.Class({
 
     }],
 
+    find_about_page: function(data) {
+	for (let page of data.index.pages) {
+	    if (page.n === "about/index") return page
+	}
+	return null
+    },
+
     clean: function() {
 	this.obd.clean()
 	this.curpost = null
+	this.curpage = null
     }
 })
 
@@ -249,7 +258,7 @@ app.Page = ng.core.Component({
 	ps.html$(this.params).subscribe((data) => {
 	    console.log(`app.Page: http.get ${ps.url(this.params)} DONE`)
 	    this.data = data
-
+	    this.ns.curpage = this.params.name
 	    this.title.setTitle(`${this.ns.data.config.title} :: ${data.subject}`)
 	}, (err) => {
 	    obd.err.text = `HTTP ${err.status}: ${ps.url(this.params)}`

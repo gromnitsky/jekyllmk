@@ -283,10 +283,30 @@ app.TagsList = ng.core.Component({
     }
 })
 
+app.AboutLink = ng.core.Component({
+    selector: 'aboutLink',
+    template: `
+<div *ngIf="ns?.about">
+  <p>
+    <a [routerLink]="['Page', {name: ns?.about?.n}]"
+       [class.selected]="ns?.about?.n == ns?.curpage">
+      {{ ns?.about?.s }}
+    </a>
+  </p>
+</div>
+`,
+    directives: [ng.router.ROUTER_DIRECTIVES],
+}).Class({
+    constructor: [NavService, function (ns) {
+	console.log('app.AboutLink')
+	this.ns = ns
+    }]
+})
+
 app.Sidebar1 = ng.core.Component({
     selector: 'sidebar1',
     templateUrl: 'sidebar1.template',
-    directives: [ng.router.ROUTER_DIRECTIVES, app.TagsList],
+    directives: [ng.router.ROUTER_DIRECTIVES, app.TagsList, app.AboutLink],
 }).Class({
     constructor: [NavService, function (ns) {
 	console.log('app.Sidebar1')

@@ -1,14 +1,9 @@
 <!-- -*-html-*- -->
 
-<nav class="jekyllmk-sidebar1" [class.jekyllmk-sidebar1--aside]="ns.sidebar1_aside">
-  <div *ngIf="ns?.about">
-    <p>
-      <a [routerLink]="['Page', {name: ns?.about?.n}]"
-	 [class.selected]="ns?.about?.n == ns?.curpage">
-	{{ ns?.about?.s }}
-      </a>
-    </p>
-  </div>
+<nav class="jekyllmk-sidebar1"
+     [class.jekyllmk-sidebar1--aside]="ns.sidebar1_aside">
+
+  <aboutLink></aboutLink>
 
   <!-- TODO: move to a separate directive -->
   <h2>Archive</h2>

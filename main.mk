@@ -152,3 +152,15 @@ export MOCHA_OUT := $(out)
 .PHONY: test
 test: node_modules.mk
 	$(mocha) -u tdd $(TEST_OPT) $(src)/test/test_*.js
+
+
+.PHONY: lint
+lint: compile
+
+css.dest := $(filter %.css, $(app.static.dest))
+
+.PHONY: lint-css
+lint-css: $(css.dest)
+	stylelint --config $(src)/stylelint.config.js $^
+
+lint: lint-css

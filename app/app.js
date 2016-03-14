@@ -265,10 +265,28 @@ app.Page = ng.core.Component({
     }]
 })
 
+app.TagsList = ng.core.Component({
+    selector: 'tagsList',
+    inputs: ['src'],
+    directives: [ng.router.ROUTER_DIRECTIVES],
+    template: `
+<ul>
+  <li *ngFor="#idx of src">
+    <a [routerLink]="['Tags', {list: idx.name }]">{{ idx.name }}</a>
+    ({{ idx.count }})
+  </li>
+</ul>
+`
+}).Class({
+    constructor: function() {
+	console.log('app.TagsList')
+    }
+})
+
 app.Sidebar1 = ng.core.Component({
     selector: 'sidebar1',
     templateUrl: 'sidebar1.template',
-    directives: [ng.router.ROUTER_DIRECTIVES],
+    directives: [ng.router.ROUTER_DIRECTIVES, app.TagsList],
 }).Class({
     constructor: [NavService, function (ns) {
 	console.log('app.Sidebar1')

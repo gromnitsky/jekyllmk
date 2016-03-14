@@ -45,19 +45,9 @@
 
 
   <h2>Authors</h2>
-  <ul>
-    <li *ngFor="#idx of ns?.data?.index?.authors">
-      <a [routerLink]="['Tags', {list: idx.name }]">{{ idx.name }}</a>
-      ({{ idx.count }})
-    </li>
-  </ul>
+  <tagsList [src]="ns?.data?.index?.authors"></tagsList>
 
   <h2>Tags</h2>
-  <ul>
-    <li *ngFor="#idx of ns?.data?.index?.tags">
-      <a [routerLink]="['Tags', {list: idx.name }]">{{ idx.name }}</a>
-      ({{ idx.count }})
-    </li>
-  </ul>
+  <tagsList [src]="ns?.data?.index?.tags"></tagsList>
 
 </nav>

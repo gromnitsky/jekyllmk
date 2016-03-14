@@ -1,13 +1,14 @@
 <!-- -*-html-*- -->
 
-<nav class="my-article-nav">
-  <a [class.hidden]="!post_prev"
+<!-- next/prev arrows -->
+<nav class="jekyllmk-postnav">
+  <a *ngIf="post_prev"
      href="{{ post_prev?.url }}" title="{{ post_prev?.subject }}">&lArr;</a>
-  <a [class.hidden]="!post_next"
+  <a *ngIf="post_next"
      href="{{ post_next?.url }}" title="{{ post_next?.subject }}">&rArr;</a>
 </nav>
 
-<article class="my-article" *ngIf="data">
+<article class="jekyllmk-post" *ngIf="data">
   <header>
     <h2>{{ data?.subject }}</h2>
     <p>

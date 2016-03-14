@@ -6,7 +6,7 @@ subject: About
 Григоровича Шевченка, які він робив протягом року після одержання
 звістки про можливе звільнення з заслання і до приїзду в Петербург.
 
-<img src="fort-shevchenko.jpg" class="img-responsive"
+<img src="fort-shevchenko.jpg" class="jekyllmk-img--responsive"
 alt="">
 
 Вперше Щоденник надруковано в журналі "Основа" (1861, #5-12; 1862,
@@ -17,5 +17,5 @@ alt="">
 року в Галичині під назвою "Записки, або Журнал Тараса Григоровича
 Грушівського-Шевченка" в журналі "Правда", т. 18-19.
 
-<img src="view-of-the-irgyzkala-fort-1850.jpg" class="img-responsive"
+<img src="view-of-the-irgyzkala-fort-1850.jpg" class="jekyllmk-img--responsive"
 alt="The View of The Irgyzkala Fort, 1850">

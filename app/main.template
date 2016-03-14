@@ -1,17 +1,25 @@
 <!-- -*-html-*- -->
 
-<header class="my-main-header">
-  <div><button (click)="nav_toggle()">&Xi;</button></div>
+<!-- a name of the blog, a button for a sidebar1 -->
+<header class="jekyllmk-header">
+  <div><button (click)="sidebar1_toggle()">&Xi;</button></div>
+
+  <!-- a title points to the default route -->
   <h1><a [routerLink]="['LastN']">{{ ns?.data?.config?.title }}</a></h1>
 </header>
 
-<div id="obd" *ngIf="obd.err.text">{{obd.err.text}}</div>
+<!-- an on-board diagnostics; it's hidden unless there are some error
+user should be aware of -->
+<obd></obd>
 
-<topmenu></topmenu>
+<!-- a calendar, a tags list -->
+<sidebar1></sidebar1>
 
+<!-- a required angular2 staff, don't remove -->
 <router-outlet></router-outlet>
 
-<footer class="my-main-footer">
+<!-- a place for an inspiration quote & a fax number -->
+<footer class="jekyllmk-footer">
   <p>
     This is no time to bite the bullet with our synchronised
     incremental paradigm shifts.

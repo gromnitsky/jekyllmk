@@ -1,6 +1,6 @@
 <!-- -*-html-*- -->
 
-<article class="my-article" *ngIf="data">
+<article class="jekyllmk-post" *ngIf="data">
   <header>
     <h2>{{ data?.subject }}</h2>
   </header>

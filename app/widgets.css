@@ -1,0 +1,186 @@
+/*
+  Defaults for jekyllmk components. You shouldn't edit them here--do
+  you customizations in `local.css` file.
+
+  A prefix for all widgets is `jekyllmk-`. Don't use it in your css
+  code.
+*/
+
+
+/* General staff */
+
+@media (min-width: 641px) {
+  body {
+    width: 640px;
+    margin: 0 auto;
+  }
+}
+
+body {
+  font-family: Georgia, serif;
+}
+
+/* a diff font for headers */
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: serif;
+}
+
+code {
+  background-color: #fafafa;
+}
+
+pre {
+  background-color: #fafafa;
+  padding: 2px 2px 2px 1em;
+  word-wrap: break-word;
+  white-space: pre-wrap;
+}
+
+.jekyllmk-img--responsive {
+  max-width: 100%;
+  height: auto;
+}
+
+
+/* Main footer */
+.jekyllmk-footer {
+  border-top: 1px dotted black;
+  font-size: small;
+  color: gray;
+}
+
+
+/* Main header */
+.jekyllmk-header a {
+  color: black;
+  text-decoration: none;
+}
+
+header.jekyllmk-header {
+  display: flex;
+  align-items: center;
+  border-bottom: 1px dotted black;
+}
+
+header.jekyllmk-header > h1 {
+  flex-grow: 1;
+  margin-top: 0;
+  margin-bottom: 0.2em;
+  text-align: center;
+  font-weight: 900;
+}
+
+
+/* On-board diagnostics */
+#jekyllmk-obd {
+  color: white;
+  background-color: red;
+  margin: 1em 0 1em 0;
+  padding: 1em;
+}
+
+
+/* Sidebar1 */
+.jekyllmk-sidebar1 {
+  background-color: brown;
+  color: whitesmoke;
+  padding: 10px;
+  transition: all 0.5s;
+  position: absolute;
+  box-shadow: 3px 3px 6px gray;
+  width: 230px;
+}
+
+.jekyllmk-sidebar1 a:hover {
+  text-decoration: underline;
+}
+
+.jekyllmk-sidebar1 a {
+  color: whitesmoke;
+  text-decoration: none;
+}
+
+.jekyllmk-sidebar1 > ul.jekyllmk-sidebar1-tree {
+  padding-left: 0;
+}
+
+.jekyllmk-sidebar1-tree {
+  list-style-type: none;
+}
+
+span.jekyllmk-sidebar1__tree_ctrl--collapsed::before {
+  content: "[+]\a";
+}
+
+span.jekyllmk-sidebar1__tree_ctrl--expanded::before {
+  content: "[-]\a";
+}
+
+.jekyllmk-sidebar1__tree_node--collapsed {
+  display: none;
+}
+
+.jekyllmk-sidebar1 .selected {
+  color: yellow;
+}
+
+.jekyllmk-sidebar1--aside {
+  box-shadow: 0 0 0;
+}
+
+@media (min-width: 641px) {
+  .jekyllmk-sidebar1--aside {
+    transform: translateX(-105%);
+  }
+}
+
+@media (max-width: 1190px) {
+  .jekyllmk-sidebar1--aside {
+    transform: translateY(-120%);
+  }
+}
+
+
+/* Post/Pages article */
+.jekyllmk-post section > p:first-child::first-letter {
+  font-size: x-large;
+  margin-right: 0.4em;
+  float: left;
+}
+
+.jekyllmk-post footer {
+  color: gray;
+}
+
+.jekyllmk-post a {
+  text-decoration: none;
+}
+
+.jekyllmk-post a:hover {
+  text-decoration: underline;
+}
+
+
+/* Post navigation */
+.jekyllmk-postnav {
+  font-size: xx-large;
+}
+
+.jekyllmk-postnav a {
+  text-decoration: none;
+}
+
+.jekyllmk-postnav a:nth-child(1) {
+  margin-right: 1em;
+}
+
+
+/* Tags form */
+.jekyllmk-tags-form input[type="text"] {
+  width: 80%;
+}

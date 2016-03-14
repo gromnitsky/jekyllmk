@@ -2,28 +2,13 @@
 
 <h2>Tags Search</h2>
 
-<form class="my-tags-form" (ngSubmit)="on_submit()">
+<form class="jekyllmk-tags-form" (ngSubmit)="on_submit()">
   <p>
     <label>
 
-      <div class="my-tags-help">
-	<div>
-	  <b>Grammar (ABNF)</b>
-	  <pre>query = list
-list = tag *(separator tag)
-tag = [op] name
-op = "-"
-name = 1*(ALPHA / DIGIT / "_" / SP)
-separator = ","</pre>
-
-	  where "," means <code>AND</code>, "-" means <code>NOT</code>.
-	</div>
-
-	<div>
-	  <b>Examples</b>
-	  <pre>Тарас Шевченко,-image</pre>
-	</div>
-      </div>
+      Tags are separated by commas. A minus <code>-</code> before a
+      tag name means <code>NOT</code>. For example:
+      <code>Тарас Шевченко,-image</code>
 
       <input type="text" spellCheck="false" required
 	     [(ngModel)]="query">

@@ -58,7 +58,7 @@ let PostService = ng.core.Class({
 let NavService = ng.core.Class({
     constructor: [IndexService, OBD, function(indser, obd) {
 	console.log('NavService')
-	this.aside = true
+	this.sidebar1_aside = true
 	this.obd = obd
 
 	this.data$ = new Rx.AsyncSubject()
@@ -66,7 +66,7 @@ let NavService = ng.core.Class({
 	indser.$src.subscribe((data) => {
 	    console.log('NavService: http.get DONE')
 	    this.about = this.find_about_page(data)
-	    index.postproc(data, data.config.topmenu.treesort)
+	    index.postproc(data, data.config.calendar.treesort)
 	    this.data = data
 
 	    this.data$.next(data)
@@ -170,7 +170,7 @@ app.Tags = ng.core.Component({
 	this.title.setTitle(`${this.ns.data.config.title} :: Tags :: ${this.query}`)
 
 	let r = tags.match_exact(this.ns.data, this.query)
-	this.result = this.ns.data.config.topmenu.treesort === "descending" ? r.reverse() : r
+	this.result = this.ns.data.config.calendar.treesort === "descending" ? r.reverse() : r
 	// should work w/o triggering the router
 	if (!this._first) this.location.replaceState(`/tags/${this.query}`)
 	this._first = false
@@ -181,7 +181,6 @@ app.Post = ng.core.Component({
     selector: 'post',
     templateUrl: 'post.template',
     directives: [ng.router.ROUTER_DIRECTIVES],
-    providers: [PostService]
 }).Class({
     constructor:
     [ng.router.Router, ng.router.RouteParams, PostService, OBD, NavService, ng.platform.browser.Title, function (router, params, ps, obd, ns, title) {
@@ -266,13 +265,13 @@ app.Page = ng.core.Component({
     }]
 })
 
-app.Nav = ng.core.Component({
-    selector: 'topmenu',
-    templateUrl: 'topmenu.template',
+app.Sidebar1 = ng.core.Component({
+    selector: 'sidebar1',
+    templateUrl: 'sidebar1.template',
     directives: [ng.router.ROUTER_DIRECTIVES],
 }).Class({
     constructor: [NavService, function (ns) {
-	console.log('app.Nav')
+	console.log('app.Sidebar1')
 	this.ns = ns
     }],
 
@@ -284,30 +283,40 @@ app.Nav = ng.core.Component({
     },
 
     plus_or_minus: function(tnode) {
-	if (!(this.ns && this.ns.curpost)) return "topmenu-tree_ctrl-collapsed"
-	return this.ns.curpost.ascendant_of(tnode) ? "topmenu-tree_ctrl-expanded" : "topmenu-tree_ctrl-collapsed"
+	if (!(this.ns && this.ns.curpost)) return "jekyllmk-sidebar1__tree_ctrl--collapsed"
+	return this.ns.curpost.ascendant_of(tnode) ? "jekyllmk-sidebar1__tree_ctrl--expanded" : "jekyllmk-sidebar1__tree_ctrl--collapsed"
     },
 
     toggle_view: function(e) {
-	e.target.classList.toggle('topmenu-tree_ctrl-expanded')
-	e.target.classList.toggle('topmenu-tree_ctrl-collapsed')
-	e.target.nextElementSibling.classList.toggle('topmenu-tree_node-collapsed')
+	e.target.classList.toggle('jekyllmk-sidebar1__tree_ctrl--expanded')
+	e.target.classList.toggle('jekyllmk-sidebar1__tree_ctrl--collapsed')
+	e.target.nextElementSibling.classList.toggle('jekyllmk-sidebar1__tree_node--collapsed')
     }
+})
+
+app.OBD = ng.core.Component({
+    selector: 'obd',
+    template: '<div id="jekyllmk-obd" *ngIf="obd.err.text">{{ obd.err.text }}</div>',
+}).Class({
+    constructor: [OBD, NavService, function (obd, ns) {
+	console.log('app.OBD')
+	this.obd = obd
+	this.ns = ns
+    }]
 })
 
 app.Main = ng.core.Component({
     selector: 'my-app',
     templateUrl: 'main.template',
-    directives: [ng.router.ROUTER_DIRECTIVES, app.Nav],
+    directives: [ng.router.ROUTER_DIRECTIVES, app.Sidebar1, app.OBD],
 }).Class({
-    constructor: [OBD, NavService, function (obd, ns) {
+    constructor: [NavService, function(ns) {
 	console.log('app.Main')
-	this.obd = obd		// template uses it
 	this.ns = ns
     }],
 
-    nav_toggle: function() {
-	this.ns.aside = !this.ns.aside
+    sidebar1_toggle: function() {
+	this.ns.sidebar1_aside = !this.ns.sidebar1_aside
     }
 })
 
@@ -344,6 +353,7 @@ document.addEventListener('DOMContentLoaded', function () {
 	    IndexService,
 	    OBD,
 	    NavService,
+	    PostService,
 
 	    ng.http.HTTP_PROVIDERS,
 

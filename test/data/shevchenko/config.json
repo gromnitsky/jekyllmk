@@ -2,7 +2,7 @@
     "title": "Щоденник Тараса Шевченко",
     "copyright": "Public domain",
 
-    "topmenu": {
+    "calendar": {
 	"treesort": "ascending"
     }
 }

@@ -85,6 +85,38 @@ header.jekyllmk-header > h1 {
 }
 
 
+/* Treeview */
+.treeview-node {
+  list-style-type: none;
+}
+
+span.treeview__sign--collapsed::before {
+  content: "[+]\a";
+}
+
+span.treeview__sign--expanded::before {
+  content: "[-]\a";
+}
+
+.treeview-node .hidden {
+  display: none;
+}
+
+.treeview-node .selected {
+  color: yellow !important;
+}
+
+.treeview-node .selected:hover {
+  text-decoration: none !important;
+  cursor: text !important;
+}
+
+.treeview-node .leaf:hover {
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+
 /* Sidebar1 */
 .jekyllmk-sidebar1 {
   background-color: brown;
@@ -96,6 +128,10 @@ header.jekyllmk-header > h1 {
   width: 230px;
 }
 
+.jekyllmk-sidebar1 > treeview > ul {
+  padding-left: 0;
+}
+
 .jekyllmk-sidebar1 a:hover {
   text-decoration: underline;
 }
@@ -103,26 +139,6 @@ header.jekyllmk-header > h1 {
 .jekyllmk-sidebar1 a {
   color: whitesmoke;
   text-decoration: none;
-}
-
-.jekyllmk-sidebar1 > ul.jekyllmk-sidebar1-tree {
-  padding-left: 0;
-}
-
-.jekyllmk-sidebar1-tree {
-  list-style-type: none;
-}
-
-span.jekyllmk-sidebar1__tree_ctrl--collapsed::before {
-  content: "[+]\a";
-}
-
-span.jekyllmk-sidebar1__tree_ctrl--expanded::before {
-  content: "[-]\a";
-}
-
-.jekyllmk-sidebar1__tree_node--collapsed {
-  display: none;
 }
 
 .jekyllmk-sidebar1 .selected {

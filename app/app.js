@@ -4,6 +4,8 @@
 let post = require('../lib/post')
 let index = require('../lib/index')
 let tags = require('../lib/tags')
+let TreeView = require('../lib/treeview')
+
 
 let OBD = ng.core.Class({
     constructor: function() {
@@ -306,30 +308,30 @@ app.AboutLink = ng.core.Component({
 app.Sidebar1 = ng.core.Component({
     selector: 'sidebar1',
     templateUrl: 'sidebar1.template',
-    directives: [ng.router.ROUTER_DIRECTIVES, app.TagsList, app.AboutLink],
+    directives: [TreeView, ng.router.ROUTER_DIRECTIVES, app.TagsList, app.AboutLink],
 }).Class({
-    constructor: [NavService, function (ns) {
+    constructor: [NavService, function(ns) {
 	console.log('app.Sidebar1')
 	this.ns = ns
     }],
 
-    is_selected: function(post) {
-	if (!(this.ns && this.ns.curpost)) return false
-	return this.ns.curpost.payload.y === post.payload.y &&
-	    this.ns.curpost.payload.m === post.payload.m &&
-	    this.ns.curpost.name === post.name
+    match: function(tnode, selected) {
+	if (!(tnode && tnode.payload && selected)) return false
+	return selected.payload.y === tnode.payload.y &&
+	    selected.payload.m === tnode.payload.m &&
+	    selected.name === tnode.name
     },
 
-    plus_or_minus: function(tnode) {
-	if (!(this.ns && this.ns.curpost)) return "jekyllmk-sidebar1__tree_ctrl--collapsed"
-	return this.ns.curpost.ascendant_of(tnode) ? "jekyllmk-sidebar1__tree_ctrl--expanded" : "jekyllmk-sidebar1__tree_ctrl--collapsed"
+    node_print: function(tnode) {
+	if (!tnode) return null
+	return tnode.kids.length ? tnode.name : tnode.payload.s
     },
 
-    toggle_view: function(e) {
-	e.target.classList.toggle('jekyllmk-sidebar1__tree_ctrl--expanded')
-	e.target.classList.toggle('jekyllmk-sidebar1__tree_ctrl--collapsed')
-	e.target.nextElementSibling.classList.toggle('jekyllmk-sidebar1__tree_node--collapsed')
-    }
+    node_click: function(event, tnode) {
+	if (!(tnode && tnode.kids.length === 0)) return
+	// router is injected in treeview
+	this.router.navigate(['/Post', {year: tnode.payload.y, month: tnode.payload.m, day: tnode.payload.d, name: tnode.payload.n }])
+    },
 })
 
 app.OBD = ng.core.Component({

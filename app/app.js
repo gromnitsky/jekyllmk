@@ -179,14 +179,48 @@ app.Tags = ng.core.Component({
     }
 })
 
-app.Post = ng.core.Component({
+app.Post = {}
+app.Post.Nav = ng.core.Component({
+    selector: 'post-nav',
+    template: `
+<nav class="jekyllmk-postnav">
+  <a *ngIf="ps?.post_prev"
+     href="{{ ps?.post_prev?.url }}" title="{{ ps?.post_prev?.subject }}">&lArr;</a>
+  <a *ngIf="ps?.post_next"
+     href="{{ ps?.post_next?.url }}" title="{{ ps?.post_next?.subject }}">&rArr;</a>
+</nav>
+`,
+    directives: [ng.router.ROUTER_DIRECTIVES]
+}).Class({
+    constructor: [PostService, function(ps) {
+	console.log("app.Post.Nav")
+	this.ps = ps
+    }]
+})
+
+app.Post.TagsList = ng.core.Component({
+    selector: 'post-tags-list',
+    inputs: ['src'],
+    template: `
+<span *ngFor="#name of src; #last = last">
+  <a [routerLink]="['Tags', {list: name }]">{{ name }}</a><span *ngIf="!last">,</span>
+</span>
+`,
+    directives: [ng.router.ROUTER_DIRECTIVES]
+}).Class({
+    constructor: function() {
+	console.log("app.Post.TagsList")
+    }
+})
+
+app.Post.Main = ng.core.Component({
     selector: 'post',
     templateUrl: 'post.template',
-    directives: [ng.router.ROUTER_DIRECTIVES],
+    directives: [ng.router.ROUTER_DIRECTIVES, app.Post.Nav, app.Post.TagsList],
 }).Class({
     constructor:
     [ng.router.Router, ng.router.RouteParams, PostService, OBD, NavService, ng.platform.browser.Title, function (router, params, ps, obd, ns, title) {
-	console.log('app.Post')
+	console.log('app.Post.Main')
 	this.router = router
 	this.params = params.params
 	this.ns = ns
@@ -196,15 +230,15 @@ app.Post = ng.core.Component({
 	this.ns.clean()
 
 	ps.html$(this.params).subscribe((data) => {
-	    console.log(`app.Post: http.get ${ps.url(this.params)} DONE`)
+	    console.log(`app.Post.Main: http.get ${ps.url(this.params)} DONE`)
 	    this.data = data
 	    this.ns.curpost = ns.data.cal
 		.find(this.params.year, this.params.month,
 		      `${this.params.day}-${this.params.name}`)
 
 	    this.title.setTitle(`${this.ns.data.config.title} :: ${['y', 'm', 'd'].map(val => this.ns.curpost.payload[val]).join('/')} :: ${this.ns.curpost.payload.s}`)
-	    this.post_prev = this.find_next_url(-1)
-	    this.post_next = this.find_next_url(1)
+	    ps.post_prev = this.find_next_url(-1)
+	    ps.post_next = this.find_next_url(1)
 	}, (err) => {
 	    obd.err.text = `HTTP ${err.status}: ${ps.url(this.params)}`
 	})
@@ -381,7 +415,7 @@ app.RouteError = ng.core.Component({
 app.Main = ng.router.RouteConfig([
     { path: '/', component: app.LastN, name: 'LastN', useAsDefault: true },
     { path: '/tags/:list', component: app.Tags, name: 'Tags' },
-    { path: '/:year/:month/:day/:name', component: app.Post, name: 'Post' },
+    { path: '/:year/:month/:day/:name', component: app.Post.Main, name: 'Post' },
     { path: '/p/*name', component: app.Page, name: 'Page' },
     { path: '/**', component: app.RouteError, name: 'RouteError' }
 ])(app.Main)

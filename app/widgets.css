@@ -200,3 +200,13 @@ span.treeview__sign--expanded::before {
 .jekyllmk-tags-form input[type="text"] {
   width: 80%;
 }
+
+
+/* About widget */
+.jekyll-about img {
+  border-radius: 6px;
+}
+
+.jekyll-about p {
+  margin-top: 0;
+}

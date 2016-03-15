@@ -1,6 +1,7 @@
 {
     "title": "Щоденник Тараса Шевченко",
     "copyright": "Public domain",
+    "avatar": "avatar.jpg",
 
     "calendar": {
 	"treesort": "ascending"

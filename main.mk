@@ -26,7 +26,7 @@ node_modules: package.json
 	touch $@
 
 package.json: $(src)/package.json
-	cp -a $< $@
+	cp $< $@
 
 # automatically restart Make if there is no node_modules folder
 include node_modules.mk
@@ -38,8 +38,7 @@ data.src := $(shell find $(DATA) -type f)
 data.dest := $(patsubst $(DATA)/%, $(out)/%, $(data.src))
 
 $(data.dest): $(out)/%: $(DATA)/%
-	$(mkdir)
-	cp -a $< $@
+	$(copy)
 
 compile: $(data.dest)
 
@@ -50,28 +49,29 @@ $(out)/index.json: $(data.dest)  node_modules.mk
 compile: $(out)/index.json
 
 
-npm.js.ext := .min.js .js
+npm.ext := .min.css .css .min.js .js
 ifeq ($(NODE_ENV), development)
-npm.js.ext := .dev.js .js
+npm.ext := .css .dev.js .js
 endif
-npm.js.src := angular2/bundles/angular2-all.umd \
-	angular2/bundles/angular2-polyfills \
-	rxjs/bundles/Rx.umd \
-	babel-polyfill/dist/polyfill
+npm.src := angular2/bundles/angular2-all.umd.js \
+	angular2/bundles/angular2-polyfills.js \
+	rxjs/bundles/Rx.umd.js \
+	babel-polyfill/dist/polyfill.js \
+	angular2-treeview/dist/treeview.css
 
-npm-get-src = $(firstword $(foreach ext,$(npm.js.ext),\
-	$(or $(wildcard node_modules/$(1)$(ext)))))
+npm-get-src = $(firstword $(foreach ext,$(npm.ext),\
+	$(or $(wildcard node_modules/$(basename $(1))$(ext)))))
 define npm-rule =
 $(2): $$(call npm-get-src,$(1))
 	$$(copy)
 endef
-npm.js.dest := $(foreach file, $(npm.js.src), $(out)/.npm/$(file).js)
+npm.dest := $(foreach file, $(npm.src), $(out)/.npm/$(file))
 # generate rules on the fly
-$(foreach file, $(npm.js.src), \
-	$(eval $(call npm-rule,$(file),$(out)/.npm/$(file).js)))
+$(foreach file, $(npm.src), \
+	$(eval $(call npm-rule,$(file),$(out)/.npm/$(file))))
 
-$(npm.js.dest): node_modules.mk
-compile: $(npm.js.dest)
+$(npm.dest): node_modules.mk
+compile: $(npm.dest)
 
 
 app.static.src := $(filter-out %.js, $(wildcard $(src)/app/*))

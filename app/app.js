@@ -4,8 +4,7 @@
 let post = require('../lib/post')
 let index = require('../lib/index')
 let tags = require('../lib/tags')
-let TreeView = require('../lib/treeview')
-
+let tw = require('angular2-treeview')
 
 let OBD = ng.core.Class({
     constructor: function() {
@@ -346,19 +345,14 @@ app.AboutLink = ng.core.Component({
 app.Sidebar1 = ng.core.Component({
     selector: 'sidebar1',
     templateUrl: 'sidebar1.template',
-    directives: [TreeView, ng.router.ROUTER_DIRECTIVES, app.TagsList, app.AboutLink],
+    directives: [tw.TreeView, ng.router.ROUTER_DIRECTIVES, app.TagsList, app.AboutLink],
 }).Class({
-    constructor: [NavService, function(ns) {
+    constructor: [ng.router.Router, NavService, function(router, ns) {
 	console.log('app.Sidebar1')
 	this.ns = ns
+	this.router = router
+	this.parent = this
     }],
-
-    match: function(tnode, selected) {
-	if (!(tnode && tnode.payload && selected)) return false
-	return selected.payload.y === tnode.payload.y &&
-	    selected.payload.m === tnode.payload.m &&
-	    selected.name === tnode.name
-    },
 
     node_print: function(tnode) {
 	if (!tnode) return null
@@ -367,8 +361,8 @@ app.Sidebar1 = ng.core.Component({
 
     node_click: function(event, tnode) {
 	if (!(tnode && tnode.kids.length === 0)) return
-	// router is injected in treeview
-	this.router.navigate(['/Post', {year: tnode.payload.y, month: tnode.payload.m, day: tnode.payload.d, name: tnode.payload.n }])
+	// `this` here is a TreeView instance
+	this.parent.router.navigate(['/Post', {year: tnode.payload.y, month: tnode.payload.m, day: tnode.payload.d, name: tnode.payload.n }])
     },
 })
 

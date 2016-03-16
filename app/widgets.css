@@ -86,34 +86,8 @@ header.jekyllmk-header > h1 {
 
 
 /* Treeview */
-.treeview-node {
-  list-style-type: none;
-}
-
-span.treeview__sign--collapsed::before {
-  content: "[+]\a";
-}
-
-span.treeview__sign--expanded::before {
-  content: "[-]\a";
-}
-
-.treeview-node .hidden {
-  display: none;
-}
-
 .treeview-node .selected {
   color: yellow !important;
-}
-
-.treeview-node .selected:hover {
-  text-decoration: none !important;
-  cursor: text !important;
-}
-
-.treeview-node .leaf:hover {
-  text-decoration: underline;
-  cursor: pointer;
 }
 
 
@@ -143,6 +117,7 @@ span.treeview__sign--expanded::before {
 
 .jekyllmk-sidebar1 .selected {
   color: yellow;
+  font-weight: bold;
 }
 
 .jekyllmk-sidebar1--aside {

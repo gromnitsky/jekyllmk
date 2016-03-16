@@ -4,11 +4,21 @@ let assert = require('assert')
 let fs = require('fs')
 let util = require('util')
 
+let out = process.env.MOCHA_OUT
+if (!out) throw new Error('no MOCHA_OUT env var')
+
+// a mock that ran amok
+global.ng = {
+    core: {
+	forwardRef: function() {},
+	Component: function() { return {Class: function() {}} }
+    },
+    router: {}
+}
+
 let index = require('../lib/index')
 let tags = require('../lib/tags')
 
-let out = process.env.MOCHA_OUT
-if (!out) throw new Error('no MOCHA_OUT env var')
 
 suite('tags', function() {
 

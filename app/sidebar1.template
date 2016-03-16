@@ -5,12 +5,11 @@
 
   <aboutLink></aboutLink>
 
-  <!-- TODO: move to a separate directive -->
   <h2>Archive</h2>
 
   <treeview [src]="ns?.data?.cal"
 	    [selected]="ns?.curpost"
-	    [match]="match"
+	    [parent]="parent"
 	    [node_print]="node_print"
 	    [node_click]="node_click">
   </treeview>

@@ -6,17 +6,14 @@ let index = require('../lib/index')
 let tags = require('../lib/tags')
 let tw = require('angular2-treeview')
 
+// On-board diagnostic display!
 let OBD = ng.core.Class({
-    constructor: function() {
-	this.err = {}
-	this.err.text = null
-    },
-
-    clean: function() {
-	this.err.text = null
-    }
+    constructor: function() { this.err = []; window.q = this.err },
+    push: function(text) { this.err.push(text) },
+    clean: function() { this.err = [] }
 })
 
+// Fetch index & config
 let IndexService = ng.core.Class({
     constructor: [ng.http.Http, function(http) {
 	console.log('IndexService: http.get')
@@ -34,6 +31,7 @@ let IndexService = ng.core.Class({
     }]
 })
 
+// Fetch a post
 let PostService = ng.core.Class({
     constructor: [ng.http.Http, function(http) {
 	console.log('PostService')
@@ -56,11 +54,11 @@ let PostService = ng.core.Class({
     }
 })
 
+// Receive an index, process it
 let NavService = ng.core.Class({
     constructor: [IndexService, OBD, function(indser, obd) {
 	console.log('NavService')
 	this.sidebar1_aside = true
-	this.obd = obd
 
 	this.data$ = new Rx.AsyncSubject()
 
@@ -74,7 +72,7 @@ let NavService = ng.core.Class({
 	    this.data$.complete()
 //	    console.log(data)
 	}, (err) => {
-	    obd.err.text = `HTTP ${err.status}: ${indser.url_index} || ${indser.url_config}`
+	    obd.push(`NavService: HTTP ${err.status}: ${indser.url_index} || ${indser.url_config}`)
 	})
 
     }],
@@ -87,7 +85,6 @@ let NavService = ng.core.Class({
     },
 
     clean: function() {
-	this.obd.clean()
 	this.curpost = null
 	this.curpage = null
     }
@@ -123,10 +120,10 @@ let app = {}
 // Detect the latest post & make a redirect to it
 app.LastN = ng.core.Component({
     selector: 'lastn',
-    template: '<p>Wait please...</p>'
+    template: `<p>[a-dancing-cat.gif] Getting an index of the last post...</p>`
 }).Class({
     constructor:
-    [ng.router.Router, NavService, OBD, function (router, ns, obd) {
+    [ng.router.Router, NavService, function (router, ns) {
 	console.log("app.LastN")
 	this.router = router
 	this.ns = ns
@@ -134,8 +131,6 @@ app.LastN = ng.core.Component({
 	ns.data$.subscribe((data) => {
 	    console.log('app.LastN: ns.data$.subscribe')
 	    this.redirect(data)
-	}, (err) => {
-	    obd.err.text = "Failed to detect the latest post."
 	})
     }],
 
@@ -161,9 +156,12 @@ app.Tags = ng.core.Component({
 	this.query = this.params.list
 	this.result = []
 
-	this.ns.clean()
 	this._first = true
-	this.on_submit()
+
+	ns.data$.subscribe( unused => {
+	    console.log('app.Tags: ns.data$.subscribe')
+	    this.on_submit()
+	})
     }],
 
     on_submit: function() {
@@ -223,14 +221,12 @@ app.Post.Main = ng.core.Component({
 	this.router = router
 	this.params = params.params
 	this.ns = ns
-	this.obd = obd
 	this.title = title
 
-	this.ns.clean()
-
-	ps.html$(this.params).subscribe((data) => {
+	ps.html$(this.params).toPromise().then(data => {
 	    console.log(`app.Post.Main: http.get ${ps.url(this.params)} DONE`)
 	    this.data = data
+	    if (!this.ns.data) throw new Error("no NavServide data")
 	    this.ns.curpost = ns.data.cal
 		.find(this.params.year, this.params.month,
 		      `${this.params.day}-${this.params.name}`)
@@ -238,8 +234,9 @@ app.Post.Main = ng.core.Component({
 	    this.title.setTitle(`${this.ns.data.config.title} :: ${['y', 'm', 'd'].map(val => this.ns.curpost.payload[val]).join('/')} :: ${this.ns.curpost.payload.s}`)
 	    ps.post_prev = this.find_next_url(-1)
 	    ps.post_next = this.find_next_url(1)
-	}, (err) => {
-	    obd.err.text = `HTTP ${err.status}: ${ps.url(this.params)}`
+	}).catch( err => {
+	    ns.clean()
+	    obd.push(`app.Post.Main: error in processing ${ps.url(this.params)}: ${err.message || err.status}`)
 	})
     }],
 
@@ -284,18 +281,17 @@ app.Page = ng.core.Component({
 	this.router = router
 	this.params = params.params
 	this.ns = ns
-	this.obd = obd
 	this.title = title
 
-	this.ns.clean()
-
-	ps.html$(this.params).subscribe((data) => {
+	ps.html$(this.params).toPromise().then( data => {
 	    console.log(`app.Page: http.get ${ps.url(this.params)} DONE`)
 	    this.data = data
 	    this.ns.curpage = this.params.name
+	    if (!this.ns.data) throw new Error("no NavServide data")
 	    this.title.setTitle(`${this.ns.data.config.title} :: ${data.subject}`)
-	}, (err) => {
-	    obd.err.text = `HTTP ${err.status}: ${ps.url(this.params)}`
+	}).catch( err => {
+	    ns.clean()
+	    obd.push(`app.Page: error in processing ${ps.url(this.params)}: ${err.message || err.status}`)
 	})
     }]
 })
@@ -368,12 +364,15 @@ app.Sidebar1 = ng.core.Component({
 
 app.OBD = ng.core.Component({
     selector: 'obd',
-    template: '<div id="jekyllmk-obd" *ngIf="obd.err.text">{{ obd.err.text }}</div>',
+    template: `<div id="jekyllmk-obd" *ngIf="obd.err.length">
+<ul>
+  <li *ngFor="#item of obd.err">{{ item }}</li>
+</ul>
+</div>`,
 }).Class({
-    constructor: [OBD, NavService, function (obd, ns) {
+    constructor: [OBD, function (obd) {
 	console.log('app.OBD')
 	this.obd = obd
-	this.ns = ns
     }]
 })
 
@@ -405,7 +404,7 @@ app.RouteError = ng.core.Component({
 	    "You're weak.",
 	    "You're the worst hacker ever.",
 	]
-	// 50% (not really) chance of displaying
+	// 50% (well, not really) chance of displaying
 	this.insult = horrible_insults[Math.floor(Math.random() * 2 * horrible_insults.length + 1)]
     }]
 })

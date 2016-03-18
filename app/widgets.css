@@ -92,7 +92,7 @@ header.jekyllmk-header > h1 {
 
 
 /* Treeview */
-.treeview-node .selected {
+.treeview__node--selected {
   color: yellow !important;
 }
 

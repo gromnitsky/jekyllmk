@@ -8,7 +8,7 @@ let tw = require('angular2-treeview')
 
 // On-board diagnostic display!
 let OBD = ng.core.Class({
-    constructor: function() { this.err = []; window.q = this.err },
+    constructor: function() { this.err = [] },
     push: function(text) { this.err.push(text) },
     clean: function() { this.err = [] }
 })

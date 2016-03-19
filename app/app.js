@@ -157,7 +157,7 @@ app.Tags = ng.core.Component({
 	this.result = []
 
 	this._first = true
-
+	ns.clean()
 	ns.data$.subscribe( unused => {
 	    console.log('app.Tags: ns.data$.subscribe')
 	    this.on_submit()
@@ -223,6 +223,7 @@ app.Post.Main = ng.core.Component({
 	this.ns = ns
 	this.title = title
 
+	ns.clean()
 	ps.html$(this.params).toPromise().then(data => {
 	    console.log(`app.Post.Main: http.get ${ps.url(this.params)} DONE`)
 	    this.data = data
@@ -235,7 +236,6 @@ app.Post.Main = ng.core.Component({
 	    ps.post_prev = this.find_next_url(-1)
 	    ps.post_next = this.find_next_url(1)
 	}).catch( err => {
-	    ns.clean()
 	    obd.push(`app.Post.Main: error in processing ${ps.url(this.params)}: ${err.message || err.status}`)
 	})
     }],
@@ -283,6 +283,7 @@ app.Page = ng.core.Component({
 	this.ns = ns
 	this.title = title
 
+	ns.clean()
 	ps.html$(this.params).toPromise().then( data => {
 	    console.log(`app.Page: http.get ${ps.url(this.params)} DONE`)
 	    this.data = data
@@ -296,7 +297,8 @@ app.Page = ng.core.Component({
     }]
 })
 
-app.TagsList = ng.core.Component({
+app.Sidebar1 = {}
+app.Sidebar1.TagsList = ng.core.Component({
     selector: 'tagsList',
     inputs: ['src'],
     directives: [ng.router.ROUTER_DIRECTIVES],
@@ -310,11 +312,11 @@ app.TagsList = ng.core.Component({
 `
 }).Class({
     constructor: function() {
-	console.log('app.TagsList')
+	console.log('app.Sidebar1.TagsList')
     }
 })
 
-app.AboutLink = ng.core.Component({
+app.Sidebar1.AboutLink = ng.core.Component({
     selector: 'aboutLink',
     template: `
 <div *ngIf="ns?.about" class="jekyll-about">
@@ -333,18 +335,18 @@ app.AboutLink = ng.core.Component({
     directives: [ng.router.ROUTER_DIRECTIVES],
 }).Class({
     constructor: [NavService, function (ns) {
-	console.log('app.AboutLink')
+	console.log('app.Sidebar1.AboutLink')
 	this.ns = ns
     }]
 })
 
-app.Sidebar1 = ng.core.Component({
+app.Sidebar1.Main = ng.core.Component({
     selector: 'sidebar1',
     templateUrl: 'sidebar1.template',
-    directives: [tw.TreeView, ng.router.ROUTER_DIRECTIVES, app.TagsList, app.AboutLink],
+    directives: [tw.TreeView, ng.router.ROUTER_DIRECTIVES, app.Sidebar1.TagsList, app.Sidebar1.AboutLink],
 }).Class({
     constructor: [ng.router.Router, NavService, function(router, ns) {
-	console.log('app.Sidebar1')
+	console.log('app.Sidebar1.Main')
 	this.ns = ns
 	this.router = router
 	this.parent = this
@@ -379,7 +381,7 @@ app.OBD = ng.core.Component({
 app.Main = ng.core.Component({
     selector: 'my-app',
     templateUrl: 'main.template',
-    directives: [ng.router.ROUTER_DIRECTIVES, app.Sidebar1, app.OBD],
+    directives: [ng.router.ROUTER_DIRECTIVES, app.Sidebar1.Main, app.OBD],
 }).Class({
     constructor: [NavService, function(ns) {
 	console.log('app.Main')

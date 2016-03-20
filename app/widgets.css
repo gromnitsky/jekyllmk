@@ -9,9 +9,9 @@
 
 /* General staff */
 
-@media (min-width: 641px) {
+@media (min-width: 701px) {
   body {
-    width: 640px;
+    width: 700px;
     margin: 0 auto;
   }
 }
@@ -43,7 +43,12 @@ pre {
 
 .jekyllmk-img--responsive {
   max-width: 100%;
+  width: 100%;
   height: auto;
+}
+
+#jekyllmk-container {
+  display: flex;
 }
 
 
@@ -98,47 +103,63 @@ header.jekyllmk-header > h1 {
 
 
 /* Sidebar1 */
-.jekyllmk-sidebar1 {
+#jekyllmk-container__sidebar1 {
+  overflow: hidden;
+  flex: 0 0 0;
   background-color: brown;
   color: whitesmoke;
-  padding: 10px;
-  transition: all 0.5s;
-  position: absolute;
-  box-shadow: 3px 3px 6px gray;
-  width: 230px;
+
+  /* IE11 */
+  width: 0;
 }
 
-.jekyllmk-sidebar1 > treeview > ul {
+#jekyllmk-container__sidebar1 nav {
+  padding: 0.6em;
+}
+
+#jekyllmk-container__sidebar1 nav > treeview > ul {
   padding-left: 0;
 }
 
-.jekyllmk-sidebar1 a:hover {
+#jekyllmk-container__sidebar1 a:hover {
   text-decoration: underline;
 }
 
-.jekyllmk-sidebar1 a {
+#jekyllmk-container__sidebar1 a {
   color: whitesmoke;
   text-decoration: none;
 }
 
-.jekyllmk-sidebar1 .selected {
+#jekyllmk-container__sidebar1 .selected {
   color: yellow;
   font-weight: bold;
 }
 
-.jekyllmk-sidebar1--aside {
-  box-shadow: 0 0 0;
+.jekyllmk-sidebar1--expanded {
+  position: absolute;
+  width: 230px !important;
+  /* overflow: visible !important; */
+  box-shadow: 3px 3px 6px gray;
 }
 
-@media (min-width: 641px) {
-  .jekyllmk-sidebar1--aside {
-    transform: translateX(-105%);
+@media (min-width: 950px) {
+  body {
+    width: 930px;
+    margin: 0 auto;
   }
-}
 
-@media (max-width: 1190px) {
-  .jekyllmk-sidebar1--aside {
-    transform: translateY(-120%);
+  #jekyllmk-container__sidebar1 {
+    flex: 0 0 230px;
+    position: static;
+    box-shadow: 0 0 0 0;
+  }
+
+  .jekyllmk-header button {
+    visibility: hidden;
+  }
+
+  #jekyllmk-container__body {
+    padding: 0 1em;
   }
 }
 

@@ -58,7 +58,7 @@ let PostService = ng.core.Class({
 let NavService = ng.core.Class({
     constructor: [IndexService, OBD, function(indser, obd) {
 	console.log('NavService')
-	this.sidebar1_aside = true
+	this.sidebar1_expanded = false
 
 	this.data$ = new Rx.AsyncSubject()
 
@@ -389,7 +389,7 @@ app.Main = ng.core.Component({
     }],
 
     sidebar1_toggle: function() {
-	this.ns.sidebar1_aside = !this.ns.sidebar1_aside
+	this.ns.sidebar1_expanded = !this.ns.sidebar1_expanded
     }
 })
 

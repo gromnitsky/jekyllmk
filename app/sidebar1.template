@@ -1,7 +1,6 @@
 <!-- -*-html-*- -->
 
-<nav class="jekyllmk-sidebar1"
-     [class.jekyllmk-sidebar1--aside]="ns.sidebar1_aside">
+<nav>
 
   <aboutLink></aboutLink>
 

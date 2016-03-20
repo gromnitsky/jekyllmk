@@ -8,15 +8,24 @@
   <h1><a [routerLink]="['LastN']">{{ ns?.data?.config?.title }}</a></h1>
 </header>
 
-<!-- an on-board diagnostics; it's hidden unless there are some error
-user should be aware of -->
-<obd></obd>
+<div id="jekyllmk-container">
 
-<!-- a calendar, a tags list -->
-<sidebar1></sidebar1>
+  <!-- a calendar, a tags list -->
+  <div id="jekyllmk-container__sidebar1"
+       [class.jekyllmk-sidebar1--expanded]="ns.sidebar1_expanded">
+    <sidebar1></sidebar1>
+  </div>
 
-<!-- a required angular2 staff, don't remove -->
-<router-outlet></router-outlet>
+  <div id="jekyllmk-container__body">
+    <!-- an on-board diagnostics; it's hidden unless there are some
+    error user should be aware of -->
+    <obd></obd>
+
+    <!-- a required angular2 staff, don't remove -->
+    <router-outlet></router-outlet>
+
+  </div>
+</div>
 
 <!-- a place for an inspiration quote & a fax number -->
 <footer class="jekyllmk-footer">

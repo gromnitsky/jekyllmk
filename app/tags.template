@@ -8,7 +8,7 @@
 
       Tags are separated by commas. A minus <code>-</code> before a
       tag name means <code>NOT</code>. For example:
-      <code>Тарас Шевченко,-image</code>
+      <code>Тарас Шевченко,-image</code> <br>
 
       <input type="text" spellCheck="false" required
 	     [(ngModel)]="query">

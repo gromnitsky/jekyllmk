@@ -1,0 +1,103 @@
+#!/usr/bin/env node
+
+'use strict'
+
+let fs = require('fs')
+let argv = require('minimist')(process.argv.slice(2))
+let marked = require('marked')
+let cheerio = require('cheerio')
+
+let post = require('./lib/post')
+
+let escapeHtml = function(unsafe) {
+    return unsafe
+	.replace(/&/g, "&amp;")
+	.replace(/</g, "&lt;")
+	.replace(/>/g, "&gt;")
+	.replace(/"/g, "&quot;")
+	.replace(/'/g, "&#039;")
+}
+
+// similar to post.md2html() only w/ cherio api
+let fixup_links = function(html, prefix) {
+    let $ = cheerio.load(html, { decodeEntities: false })
+
+    let fix = function(tag, attr) {
+	$(tag).each(function(idx, elm) {
+	    let url = $(elm).attr(attr)
+	    if (!url) return
+	    if (url.match(/^[a-z]+:/)) return
+	    $(elm).attr(attr, `${prefix}/${url}`)
+	})
+    }
+
+    fix('img', 'src')
+    fix('a', 'href')
+    return escapeHtml($.html())
+}
+
+let md_parse = function(file, idx, cal) {
+    return new Promise( (resolve, reject) => {
+	fs.readFile(file, 'utf8', (err, data) => {
+	    if (err) {
+		reject(err)
+		return
+	    }
+	    let r = post.parse(data)
+	    let mtime = fs.statSync(file).mtime
+	    let postpath = [cal[1], cal[2], cal[3], cal[4]].join('/')
+	    let html = fixup_links(marked(r._fm.body), postpath)
+	    let authors = r.authors.map(val => {
+		return `<author><name>${escapeHtml(val)}</name></author>`
+	    })
+	    let categories = r.tags.map(val => {
+		return `<category term="${escapeHtml(val)}" />`
+	    })
+	    let template = `
+<entry>
+  <title>${r.subject}</title>
+  <link href="${postpath}" />
+  <id>${mtime}</id>
+  <updated>${mtime}</updated>
+  ${authors.join("\n")}
+  ${categories.join("\n")}
+  <content type="html">${html}</content>
+</entry>
+`
+	    resolve({
+		idx,
+		xml: template
+	    })
+	})
+    })
+}
+
+
+if (!argv._.length) {
+    console.error("Usage: index YYYY/DD/MM/1.md ...")
+    process.exit(1)
+}
+
+let files = argv._.sort().reverse()
+let promises = []
+let posts = []
+let files_ignored = 0
+let max_entries = argv.n || 4
+for (let idx = 0; idx < files.length; ++idx) {
+    let file = files[idx]
+    let m = file.match(/(\d{4})\/(\d{2})\/(\d{2})\/(.+).md$/)
+    if (m) {
+	if (max_entries-- === 0) break
+	if (argv.v) console.error(`post (${max_entries}): ${file}`)
+	promises.push(md_parse(file, idx - files_ignored, m).
+		      then( data => {
+			  posts[data.idx] = data.xml
+		      }))
+    } else {
+	files_ignored++
+    }
+}
+
+Promise.all(promises).then( ()=> {
+    process.stdout.write(posts.join("\n"))
+})

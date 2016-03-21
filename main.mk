@@ -49,6 +49,12 @@ $(out)/index.json: $(data.dest)  node_modules.mk
 compile: $(out)/index.json
 
 
+$(out)/feed.xml: $(data.dest)  node_modules.mk
+	$(src)/feed -c $(out)/config.json $(data.dest) > $@
+
+compile: $(out)/feed.xml
+
+
 npm.ext := .min.css .css .min.js .js
 ifeq ($(NODE_ENV), development)
 npm.ext := .css .dev.js .js

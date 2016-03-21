@@ -3,20 +3,13 @@
 'use strict'
 
 let fs = require('fs')
+
 let argv = require('minimist')(process.argv.slice(2))
 let marked = require('marked')
 let cheerio = require('cheerio')
+let Mustache = require('mustache')
 
 let post = require('./lib/post')
-
-let escapeHtml = function(unsafe) {
-    return unsafe
-	.replace(/&/g, "&amp;")
-	.replace(/</g, "&lt;")
-	.replace(/>/g, "&gt;")
-	.replace(/"/g, "&quot;")
-	.replace(/'/g, "&#039;")
-}
 
 // similar to post.md2html() only w/ cherio api
 let fixup_links = function(html, prefix) {
@@ -33,10 +26,10 @@ let fixup_links = function(html, prefix) {
 
     fix('img', 'src')
     fix('a', 'href')
-    return escapeHtml($.html())
+    return $.html()
 }
 
-let md_parse = function(file, idx, cal) {
+let md_parse = function(config, file, idx, cal) {
     return new Promise( (resolve, reject) => {
 	fs.readFile(file, 'utf8', (err, data) => {
 	    if (err) {
@@ -44,43 +37,55 @@ let md_parse = function(file, idx, cal) {
 		return
 	    }
 	    let r = post.parse(data)
+	    let postpath = [config.feed.baseurl, '#',
+			    cal[1], cal[2], cal[3], cal[4]].join('/')
 	    let mtime = fs.statSync(file).mtime
-	    let postpath = [cal[1], cal[2], cal[3], cal[4]].join('/')
-	    let html = fixup_links(marked(r._fm.body), postpath)
-	    let authors = r.authors.map(val => {
-		return `<author><name>${escapeHtml(val)}</name></author>`
-	    })
-	    let categories = r.tags.map(val => {
-		return `<category term="${escapeHtml(val)}" />`
-	    })
-	    let template = `
+	    let view = {
+		subject: r.subject,
+		mtime: mtime.toISOString(),
+		postpath,
+		html: fixup_links(marked(r._fm.body), postpath),
+		authors: r.authors,
+		categories: r.tags
+	    }
+	    let template = Mustache.render(`
 <entry>
-  <title>${r.subject}</title>
-  <link href="${postpath}" />
-  <id>${mtime}</id>
-  <updated>${mtime}</updated>
-  ${authors.join("\n")}
-  ${categories.join("\n")}
-  <content type="html">${html}</content>
+  <title>{{subject}}</title>
+  <link href="{{{postpath}}}" />
+  <id>{{{postpath}}}</id>
+  <updated>{{mtime}}</updated>
+  {{#authors}}
+  <author><name>{{.}}</name></author>
+  {{/authors}}
+  {{#categories}}
+  <category term="{{.}}" />
+  {{/categories}}
+  <content type="html">{{html}}</content>
 </entry>
-`
+`, view)
 	    resolve({
 		idx,
+		updated: mtime,
 		xml: template
 	    })
 	})
     })
 }
 
+let last_updated = function(arr) {
+    return arr.sort( (a, b) => b.valueOf() - a.valueOf())[0]
+}
 
-if (!argv._.length) {
-    console.error("Usage: index YYYY/DD/MM/1.md ...")
+if (!argv._.length || !argv.c) {
+    console.error("Usage: feed -c config.json YYYY/DD/MM/1.md ...")
     process.exit(1)
 }
 
+let config = JSON.parse(fs.readFileSync(argv.c).toString())
 let files = argv._.sort().reverse()
 let promises = []
 let posts = []
+let updated = []
 let files_ignored = 0
 let max_entries = argv.n || 4
 for (let idx = 0; idx < files.length; ++idx) {
@@ -89,9 +94,10 @@ for (let idx = 0; idx < files.length; ++idx) {
     if (m) {
 	if (max_entries-- === 0) break
 	if (argv.v) console.error(`post (${max_entries}): ${file}`)
-	promises.push(md_parse(file, idx - files_ignored, m).
+	promises.push(md_parse(config, file, idx - files_ignored, m).
 		      then( data => {
 			  posts[data.idx] = data.xml
+			  updated[data.idx] = data.updated
 		      }))
     } else {
 	files_ignored++
@@ -99,5 +105,28 @@ for (let idx = 0; idx < files.length; ++idx) {
 }
 
 Promise.all(promises).then( ()=> {
-    process.stdout.write(posts.join("\n"))
+    let view = {
+	updated: last_updated(updated).toISOString(),
+	posts,
+	link: [config.feed.baseurl, 'feed.xml'].join("/"),
+	title: config.title,
+	author: config.feed.author,
+	copyright: config.copyright
+    }
+    process.stdout.write(Mustache.render(`<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+<title>{{title}}</title>
+<author><name>{{author}}</name></author>
+<link href="{{{link}}}"/>
+<updated>{{updated}}</updated>
+<id>{{{link}}}</id>
+<rights>{{copyright}}</rights>
+
+{{#posts}}
+{{{.}}}
+{{/posts}}
+
+</feed>
+`, view))
 })

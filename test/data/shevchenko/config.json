@@ -3,6 +3,11 @@
     "copyright": "Public domain",
     "avatar": "avatar.jpg",
 
+    "feed": {
+	"baseurl": "http://blog.example.com",
+	"author": "Тарас Шевченко"
+    },
+
     "calendar": {
 	"treesort": "ascending"
     }

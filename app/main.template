@@ -1,5 +1,8 @@
 <!-- -*-html-*- -->
 
+<!-- a custom optional header from `local.header.html` -->
+<div class="jekyllmk-header__local" [innerHTML]="header"></div>
+
 <!-- a name of the blog, a button for a sidebar1 -->
 <header class="jekyllmk-header">
   <div><button (click)="sidebar1_toggle()">&Xi;</button></div>
@@ -27,10 +30,5 @@
   </div>
 </div>
 
-<!-- a place for an inspiration quote & a fax number -->
-<footer class="jekyllmk-footer">
-  <p>
-    This is no time to bite the bullet with our synchronised
-    incremental paradigm shifts.
-  </p>
-</footer>
+<!-- a custom optional header from `local.footer.html` -->
+<footer class="jekyllmk-footer" [innerHTML]="footer"></footer>

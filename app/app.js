@@ -31,6 +31,24 @@ let IndexService = ng.core.Class({
     }]
 })
 
+// Fetch custom header & footer
+let HeaderFooterService = ng.core.Class({
+    constructor: [ng.http.Http, function(http) {
+	console.log('HeaderFooterService: http.get')
+	this.url_header = 'local.header.html'
+	this.url_footer = 'local.footer.html'
+	this.http = http
+    }],
+
+    header$: function() {
+	return this.http.get(this.url_header)
+    },
+
+    footer$: function() {
+	return this.http.get(this.url_footer)
+    }
+})
+
 // Fetch a post
 let PostService = ng.core.Class({
     constructor: [ng.http.Http, function(http) {
@@ -123,10 +141,11 @@ app.LastN = ng.core.Component({
     template: `<p>[a-dancing-cat.gif] Getting an index of the last post...</p>`
 }).Class({
     constructor:
-    [ng.router.Router, NavService, function (router, ns) {
+    [ng.router.Router, NavService, OBD, function (router, ns, obd) {
 	console.log("app.LastN")
 	this.router = router
 	this.ns = ns
+	this.obd = obd
 
 	ns.data$.subscribe((data) => {
 	    console.log('app.LastN: ns.data$.subscribe')
@@ -136,7 +155,11 @@ app.LastN = ng.core.Component({
 
     redirect: function(data) {
 	let post = data.index.posts[0]
-	this.router.navigate(['/Post', {year: post.y, month: post.m, day: post.d, name: post.n }])
+	if (post) {
+	    this.router.navigate(['/Post', {year: post.y, month: post.m, day: post.d, name: post.n }])
+	} else {
+	    this.obd.push('app.LastN: no posts, cannot redirect')
+	}
     }
 })
 
@@ -383,9 +406,20 @@ app.Main = ng.core.Component({
     templateUrl: 'main.template',
     directives: [ng.router.ROUTER_DIRECTIVES, app.Sidebar1.Main, app.OBD],
 }).Class({
-    constructor: [NavService, function(ns) {
+    constructor: [NavService, HeaderFooterService, function(ns, hfs) {
 	console.log('app.Main')
 	this.ns = ns
+	this.header = ''
+	this.footer = 'A place for an inspiration quote & a fax number.';
+
+	// pseudo-macros!
+	['header', 'footer'].forEach( idx => {
+	    hfs[`${idx}$`]().subscribe( data => {
+		console.log(`app.Main: ${idx} DONE`)
+		this[idx] = data._body
+	    }, err => console.log(`app.Main: no custom ${idx}`))
+	})
+
     }],
 
     sidebar1_toggle: function() {
@@ -427,6 +461,7 @@ document.addEventListener('DOMContentLoaded', function () {
 	    OBD,
 	    NavService,
 	    PostService,
+	    HeaderFooterService,
 
 	    ng.http.HTTP_PROVIDERS,
 

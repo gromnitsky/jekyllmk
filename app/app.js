@@ -154,7 +154,8 @@ app.LastN = ng.core.Component({
     }],
 
     redirect: function(data) {
-	let post = data.index.posts[0]
+	let first = this.ns.data.config.calendar.treesort === "descending" ? data.index.posts.length-1 : 0
+	let post = data.index.posts[first]
 	if (post) {
 	    this.router.navigate(['/Post', {year: post.y, month: post.m, day: post.d, name: post.n }])
 	} else {

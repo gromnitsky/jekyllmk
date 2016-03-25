@@ -1,47 +1,84 @@
 #!/usr/bin/env wish
 
+# appears in json
 array set conf {
-    meta.title "Dude's Blog"
-    meta.license "Creative Commons Attribution-NoDerivs 3.0"
-    meta.sort "descending"
-
-    comp.avatar 1
-    comp.about_page 1
-    comp.header 0
-    comp.footer 1
+    title "Byron B. Buffington II's Blog"
+    license "Creative Commons Attribution-NoDerivs 3.0"
+    calendar.treesort "descending"
+    avatar "ua.jpg"
 
     feed.baseurl "http://example.com/blog"
-    feed.author "Dude"
+    feed.author {Byron "The Buffer" Buffington}
 }
+
+# this won't end up in json
+set conf(b.avatar) 1
+set conf(b.about_page) 1
+set conf(b.header) 0
+set conf(b.footer) 1
 
 set margin 15
 set smargin 5
 
-wm title . "jekyllmk generator"
-#wm resizable . 1 0
-font configure TkDefaultFont -size 9
-font configure TkTextFont -size 9 -family Courier
-
 proc table_row {parent wname text var} {
     global margin
     ttk::label $parent.${wname}_label -text $text
-    ttk::entry $parent.$wname -textvariable conf($var.$wname) -width 40
+    ttk::entry $parent.$wname -textvariable conf($var) -width 40
     grid $parent.${wname}_label $parent.$wname -padx $margin -pady "$margin 0"
     grid $parent.${wname}_label -sticky e
     grid $parent.$wname -sticky ew
 }
 
+proc json_escape {val} {
+    return \"[string map [list \\ \\\\ \" \\" \n \\n \b \\b \r \\r \t \\t] $val]\"; #"
+}
+
+proc ok {} {
+    global conf
+
+    # create stubs
+
+    # json generation is non-existent in Tcl
+    if {!$conf(b.avatar)} { set conf(avatar) null }
+    foreach key [array names conf] {
+	set conf($key) [json_escape $conf($key)]
+    }
+
+    puts "{
+  \"avatar\": $conf(avatar),
+  \"calendar\": {
+    \"treesort\": $conf(calendar.treesort)
+  },
+  \"feed\": {
+    \"author\": $conf(feed.author),
+    \"baseurl\": $conf(feed.baseurl)
+  },
+  \"license\": $conf(license),
+  \"title\": $conf(title)
+}"
+
+    exit 0
+}
+
+
+# Main
+
+wm title . "jekyllmk generator"
+font configure TkDefaultFont -size 9
+font configure TkTextFont -size 9 -family Courier
+bind . <Escape> {exit 1}
+
 # Meta
 ttk::labelframe .meta -text "Meta" -padding "0 0 0 $margin"
-table_row .meta title "Site title:" meta
-table_row .meta license "License:" meta
+table_row .meta title "Site title:" title
+table_row .meta license "License:" license
 
 ttk::label .meta.sort_label -text "Calendar sort order:"
 ttk::frame .meta.sort_radiobutton_frame
 ttk::radiobutton .meta.sort_ascending -text "ascending" \
-    -variable conf(meta.sort) -value ascending
+    -variable conf(calendar.treesort) -value ascending
 ttk::radiobutton .meta.sort_descending -text "descending" \
-    -variable conf(meta.sort) -value descending
+    -variable conf(calendar.treesort) -value descending
 pack .meta.sort_ascending .meta.sort_descending \
     -in .meta.sort_radiobutton_frame -side left -padx "0 $margin"
 grid .meta.sort_label .meta.sort_radiobutton_frame -padx $margin -pady "$margin 0"
@@ -54,11 +91,11 @@ pack .meta -fill x -padx $margin -pady "$margin 0"
 
 # Visual Components
 ttk::labelframe .comp -text "Visual Components" -padding "0 0 0 $margin"
-ttk::checkbutton .comp.avatar -text "Avatar" -variable conf(comp.avatar)
+ttk::checkbutton .comp.avatar -text "Avatar" -variable conf(b.avatar)
 ttk::checkbutton .comp.about_page -text "About page" \
-    -variable conf(comp.about_page)
-ttk::checkbutton .comp.header -text "Custom header" -variable conf(comp.header)
-ttk::checkbutton .comp.footer -text "Custom footer" -variable conf(comp.footer)
+    -variable conf(b.about_page)
+ttk::checkbutton .comp.header -text "Custom header" -variable conf(b.header)
+ttk::checkbutton .comp.footer -text "Custom footer" -variable conf(b.footer)
 
 grid .comp.avatar .comp.about_page  -padx $margin -pady "$margin 0"  -sticky w
 grid .comp.header .comp.footer  -padx $margin -pady "$margin 0" -sticky w
@@ -67,8 +104,8 @@ pack .comp -fill x -padx $margin -pady "$margin 0"
 
 # Atom feed
 ttk::labelframe .feed -text "Atom feed" -padding "0 0 0 $margin"
-table_row .feed baseurl "Base URL:" feed
-table_row .feed author "Author:" feed
+table_row .feed baseurl "Base URL:" feed.baseurl
+table_row .feed author "Author:" feed.author
 grid columnconfigure .feed 1 -weight 1
 
 pack .feed -fill x -padx $margin -pady $margin
@@ -81,9 +118,3 @@ ttk::button .buttons.ok -text "OK" -command ok
 
 pack .buttons.cancel .buttons.ok -side left -padx "$margin 0"
 pack .buttons -padx $margin -pady $margin -side right -anchor se
-
-
-proc ok {} {
-    global conf
-    parray conf
-}

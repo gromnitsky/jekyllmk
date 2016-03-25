@@ -411,7 +411,7 @@ app.Main = ng.core.Component({
 	console.log('app.Main')
 	this.ns = ns
 	this.header = ''
-	this.footer = 'A place for an inspiration quote & a fax number.';
+	this.footer = '<p>A place for an inspiration quote & a fax number.</p>';
 
 	// pseudo-macros!
 	['header', 'footer'].forEach( idx => {

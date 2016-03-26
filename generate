@@ -17,10 +17,9 @@ array set gui {
 }
 
 array set conf {}
-set conf(dir) [pwd]
+set conf(dir) [expr {[llength $argv] ? [lindex $argv 0] : [pwd]}]; # Tcl is ugly
 
-set margin 15
-set smargin 5
+set margin 0.3c;		# in centimeters
 
 proc table_row {parent wname text var} {
     global margin
@@ -32,7 +31,7 @@ proc table_row {parent wname text var} {
 }
 
 proc json_escape {val} {
-    return \"[string map [list \\ \\\\ \" \\" \n \\n \b \\b \r \\r \t \\t] $val]\"; #"
+    return \"[string map [list "\"" "\\\"" \\ \\\\ \b \\b \f \\f \n \\n \r \\r \t \\t] $val]\"
 }
 
 proc ok {} {
@@ -50,23 +49,21 @@ proc ok {} {
 # Main
 wm title . "jekyllmk generator"
 wm protocol . WM_DELETE_WINDOW {exit 1}
-font configure TkDefaultFont -size 9
-font configure TkTextFont -size 9 -family Courier
 bind . <Escape> {exit 1}
-
-
-# pwd
-ttk::frame .info
-ttk::label .info.a -text "Directory:"
-ttk::entry .info.b -textvariable conf(dir) -state readonly
-grid .info.a .info.b  -padx "$margin 0" -sticky w
-grid .info.b -sticky we
-grid columnconfigure .info 1 -weight 1
-pack .info -fill x -padx "0 $margin" -pady "$margin 0"
-
+if {[tk windowingsystem] == "x11"} {
+    # force all fonts to have a platform-dependent default size
+    # according to the DPI
+    foreach idx [font names] { font configure $idx -size 0 }
+}
 
 # Meta
 ttk::labelframe .meta -text "Meta" -padding "0 0 0 $margin"
+
+ttk::label .meta.dir_label -text "Directory:"
+ttk::entry .meta.dir -textvariable conf(dir) -state readonly -takefocus 0
+grid .meta.dir_label .meta.dir -sticky e -padx $margin -pady "$margin 0"
+grid .meta.dir -sticky ew
+
 table_row .meta title "Site title:" title
 table_row .meta license "License:" license
 
@@ -111,7 +108,11 @@ pack .feed -fill x -padx $margin -pady $margin
 # Buttons
 frame .buttons
 ttk::button .buttons.cancel -text "Cancel" -command {exit 1}
-ttk::button .buttons.ok -text "OK" -command ok
+ttk::button .buttons.ok -text "OK" -command ok -default active
+bind . <Return> [list .buttons.ok invoke]
+focus .buttons.ok
 
 pack .buttons.cancel .buttons.ok -side left -padx "$margin 0"
 pack .buttons -padx $margin -pady $margin -side right -anchor se
+
+raise .;    # w/o this Windows 10 doesn't give us the focus on startup

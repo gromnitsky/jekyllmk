@@ -1,4 +1,5 @@
 #!/bin/sh
+# -*-tcl-*- \
 # the next line restarts using wish \
 exec wish "$0" -name jekyllmk_generator ${1+"$@"}
 
@@ -20,6 +21,14 @@ array set conf {}
 set conf(dir) [expr {[llength $argv] ? [lindex $argv 0] : [pwd]}]; # Tcl is ugly
 
 set margin 0.3c;		# in centimeters
+
+proc script_dir {} {
+    set r [info script]
+    if {![catch {file link $r} symlink]} {
+	set r [file join [file dirname $r] $symlink]
+    }
+    return [file dirname [file normalize $r]]
+}
 
 proc table_row {parent wname text var} {
     global margin
@@ -46,8 +55,7 @@ proc ok {} {
 }
 
 
-# Main
-wm title . "jekyllmk generator"
+wm title . "jekyllmk generator :: new site"
 wm protocol . WM_DELETE_WINDOW {exit 1}
 bind . <Escape> {exit 1}
 if {[tk windowingsystem] == "x11"} {
@@ -56,11 +64,24 @@ if {[tk windowingsystem] == "x11"} {
     foreach idx [font names] { font configure $idx -size 0 }
 }
 
+# Main
+set pic [image create photo -file \
+	     [file join [script_dir] sense-and-sensibility.png] -format png]
+ttk::frame .main
+ttk::label .main.pic -image $pic; # -relief sunken
+ttk::frame .main.opts
+grid .main.pic .main.opts -in .main
+grid .main.pic -padx "$margin 0" -pady $margin
+grid .main.opts -sticky nesw
+grid columnconfigure .main 1 -weight 1
+pack .main -fill x
+
 # Meta
 ttk::labelframe .meta -text "Meta" -padding "0 0 0 $margin"
 
 ttk::label .meta.dir_label -text "Directory:"
-ttk::entry .meta.dir -textvariable conf(dir) -state readonly -takefocus 0
+ttk::entry .meta.dir -textvariable conf(dir) -state readonly -takefocus 0 \
+    -font TkFixedFont
 grid .meta.dir_label .meta.dir -sticky e -padx $margin -pady "$margin 0"
 grid .meta.dir -sticky ew
 
@@ -80,7 +101,7 @@ grid .meta.sort_label -sticky e
 grid .meta.sort_radiobutton_frame -sticky w
 
 grid columnconfigure .meta 1 -weight 1
-pack .meta -fill x -padx $margin -pady "$margin 0"
+pack .meta -fill x -padx $margin -pady "$margin 0" -in .main.opts
 
 
 # Visual Components
@@ -93,16 +114,22 @@ ttk::checkbutton .comp.footer -text "Custom footer" -variable gui(footer)
 
 grid .comp.avatar .comp.about_page  -padx $margin -pady "$margin 0"  -sticky w
 grid .comp.header .comp.footer  -padx $margin -pady "$margin 0" -sticky w
-pack .comp -fill x -padx $margin -pady "$margin 0"
+pack .comp -fill x -padx $margin -pady "$margin 0"  -in .main.opts
 
 
 # Atom feed
 ttk::labelframe .feed -text "Atom feed" -padding "0 0 0 $margin"
 table_row .feed baseurl "Base URL:" feed_baseurl
+.feed.baseurl configure -font TkFixedFont
 table_row .feed author "Author:" feed_author
 grid columnconfigure .feed 1 -weight 1
 
-pack .feed -fill x -padx $margin -pady $margin
+pack .feed -fill x -padx $margin -pady $margin  -in .main.opts
+
+
+# Separator
+ttk::separator .sep
+pack .sep -fill x
 
 
 # Buttons

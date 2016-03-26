@@ -1,21 +1,23 @@
-#!/usr/bin/env wish
+#!/bin/sh
+# the next line restarts using wish \
+exec wish "$0" -name jekyllmk_generator ${1+"$@"}
 
-# appears in json
-array set conf {
+array set gui {
     title "Byron B. Buffington II's Blog"
     license "Creative Commons Attribution-NoDerivs 3.0"
-    calendar.treesort "descending"
-    avatar "ua.jpg"
+    calendar_treesort "descending"
 
-    feed.baseurl "http://example.com/blog"
-    feed.author {Byron "The Buffer" Buffington}
+    feed_baseurl "http://example.com/blog"
+    feed_author {Byron "The Buffer" Buffington}
+
+    avatar 1
+    about_page 1
+    header 0
+    footer 1
 }
 
-# this won't end up in json
-set conf(b.avatar) 1
-set conf(b.about_page) 1
-set conf(b.header) 0
-set conf(b.footer) 1
+array set conf {}
+set conf(dir) [pwd]
 
 set margin 15
 set smargin 5
@@ -23,7 +25,7 @@ set smargin 5
 proc table_row {parent wname text var} {
     global margin
     ttk::label $parent.${wname}_label -text $text
-    ttk::entry $parent.$wname -textvariable conf($var) -width 40
+    ttk::entry $parent.$wname -textvariable gui($var) -width 40
     grid $parent.${wname}_label $parent.$wname -padx $margin -pady "$margin 0"
     grid $parent.${wname}_label -sticky e
     grid $parent.$wname -sticky ew
@@ -34,39 +36,34 @@ proc json_escape {val} {
 }
 
 proc ok {} {
-    global conf
+    global gui
 
-    # create stubs
-
-    # json generation is non-existent in Tcl
-    if {!$conf(b.avatar)} { set conf(avatar) null }
-    foreach key [array names conf] {
-	set conf($key) [json_escape $conf($key)]
+    set r [list]
+    foreach key [array names gui] {
+	lappend r "[json_escape $key]: [json_escape $gui($key)]"
     }
-
-    puts "{
-  \"avatar\": $conf(avatar),
-  \"calendar\": {
-    \"treesort\": $conf(calendar.treesort)
-  },
-  \"feed\": {
-    \"author\": $conf(feed.author),
-    \"baseurl\": $conf(feed.baseurl)
-  },
-  \"license\": $conf(license),
-  \"title\": $conf(title)
-}"
-
+    puts \{[join $r ",\n"]\}
     exit 0
 }
 
 
 # Main
-
 wm title . "jekyllmk generator"
+wm protocol . WM_DELETE_WINDOW {exit 1}
 font configure TkDefaultFont -size 9
 font configure TkTextFont -size 9 -family Courier
 bind . <Escape> {exit 1}
+
+
+# pwd
+ttk::frame .info
+ttk::label .info.a -text "Directory:"
+ttk::entry .info.b -textvariable conf(dir) -state readonly
+grid .info.a .info.b  -padx "$margin 0" -sticky w
+grid .info.b -sticky we
+grid columnconfigure .info 1 -weight 1
+pack .info -fill x -padx "0 $margin" -pady "$margin 0"
+
 
 # Meta
 ttk::labelframe .meta -text "Meta" -padding "0 0 0 $margin"
@@ -76,9 +73,9 @@ table_row .meta license "License:" license
 ttk::label .meta.sort_label -text "Calendar sort order:"
 ttk::frame .meta.sort_radiobutton_frame
 ttk::radiobutton .meta.sort_ascending -text "ascending" \
-    -variable conf(calendar.treesort) -value ascending
+    -variable gui(calendar_treesort) -value ascending
 ttk::radiobutton .meta.sort_descending -text "descending" \
-    -variable conf(calendar.treesort) -value descending
+    -variable gui(calendar_treesort) -value descending
 pack .meta.sort_ascending .meta.sort_descending \
     -in .meta.sort_radiobutton_frame -side left -padx "0 $margin"
 grid .meta.sort_label .meta.sort_radiobutton_frame -padx $margin -pady "$margin 0"
@@ -91,11 +88,11 @@ pack .meta -fill x -padx $margin -pady "$margin 0"
 
 # Visual Components
 ttk::labelframe .comp -text "Visual Components" -padding "0 0 0 $margin"
-ttk::checkbutton .comp.avatar -text "Avatar" -variable conf(b.avatar)
+ttk::checkbutton .comp.avatar -text "Avatar" -variable gui(avatar)
 ttk::checkbutton .comp.about_page -text "About page" \
-    -variable conf(b.about_page)
-ttk::checkbutton .comp.header -text "Custom header" -variable conf(b.header)
-ttk::checkbutton .comp.footer -text "Custom footer" -variable conf(b.footer)
+    -variable gui(about_page)
+ttk::checkbutton .comp.header -text "Custom header" -variable gui(header)
+ttk::checkbutton .comp.footer -text "Custom footer" -variable gui(footer)
 
 grid .comp.avatar .comp.about_page  -padx $margin -pady "$margin 0"  -sticky w
 grid .comp.header .comp.footer  -padx $margin -pady "$margin 0" -sticky w
@@ -104,8 +101,8 @@ pack .comp -fill x -padx $margin -pady "$margin 0"
 
 # Atom feed
 ttk::labelframe .feed -text "Atom feed" -padding "0 0 0 $margin"
-table_row .feed baseurl "Base URL:" feed.baseurl
-table_row .feed author "Author:" feed.author
+table_row .feed baseurl "Base URL:" feed_baseurl
+table_row .feed author "Author:" feed_author
 grid columnconfigure .feed 1 -weight 1
 
 pack .feed -fill x -padx $margin -pady $margin

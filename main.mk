@@ -9,7 +9,8 @@ pp-%:
 NODE_ENV ?= development
 out := $(NODE_ENV)/site
 out.tmp := $(NODE_ENV)
-src := $(dir $(realpath $(lastword $(MAKEFILE_LIST))))
+src.mk := $(realpath $(lastword $(MAKEFILE_LIST)))
+src := $(dir $(src.mk))
 
 DATA := $(src)/test/data/shevchenko
 
@@ -180,3 +181,16 @@ else
 endif
 
 compile: $(out)/.npm/angular2.js
+
+
+# new site generator
+NEW=$(CURDIR)
+new.ui := gui
+
+$(NEW)/config.js:
+	@[[ ! `ls -A $(NEW) 2>/dev/null` ]] || (printf "%s\n%s\n" 'Directory `$(NEW)` is not empty' 'Retype: make -f ...$(notdir $(src.mk)) generate NEW=some/other/dir'; exit 1)
+	$(mkdir)
+	$(src)/generator/options-$(new.ui) $(NEW) | $(src)/generator/jekyllmk-new
+
+.PHONY: generate
+generate: $(NEW)/config.js

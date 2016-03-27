@@ -1,0 +1,78 @@
+#!/usr/bin/env node
+
+'use strict';
+
+let fs = require('fs')
+let path = require('path')
+
+let Mustache = require('mustache')
+let sh = require('shelljs')
+let quote = require('shell-quote').quote
+
+let pad = function(str) { return ('0'+str).slice(-2) }
+
+let user_opts = function() {
+    try {
+	return JSON.parse(fs.readFileSync('/dev/stdin').toString())
+    } catch (e) {
+	process.exit(1)
+    }
+}
+
+let render = function(src, dest, view) {
+    fs.createWriteStream(dest)
+	.write(Mustache.render(fs.readFileSync(dest).toString(), view))
+}
+
+let opts = user_opts()
+let config = {
+    "title": opts.title,
+    "license": opts.license,
+    "avatar": opts.avatar === "1" ? "ua.jpg" : null,
+
+    "feed": {
+	"baseurl": opts.feed_baseurl,
+	"author": opts.feed_author
+    },
+
+    "calendar": {
+	"treesort": opts.calendar_treesort
+    }
+}
+
+let src = path.join(__dirname, 'templates')
+let out = path.join(opts.dir, '/')
+
+sh.config.verbose = true
+sh.config.fatal = true
+
+if (opts.avatar === "1") sh.cp(path.join(src, 'ua.jpg'), out)
+if (opts.about_page === "1")
+    sh.exec(quote(['cp', '-RLf', path.join(src, 'about'), out]))
+
+// header
+if (opts.header === "1") sh.cp(path.join(src, 'local.header.html'), out)
+
+// footer
+if (opts.footer === "1") sh.cp(path.join(src, 'local.footer.html'), out)
+
+// local css
+if (opts.css_example === "1") {
+    sh.cp(path.join(src, 'local.css'), out)
+} else {
+    fs.createWriteStream(path.join(out, 'local.css'))
+	.write("/* Insert your CSS rules here */\n")
+}
+
+// post
+let d = new Date()
+let post_dir = path.join(out, d.getFullYear().toString(), pad(d.getMonth()),
+			 pad(d.getDate()))
+sh.mkdir('-p', post_dir)
+sh.exec(`cp ${path.join(src, 'post', '*')} ${post_dir}`)
+render(path.join(src, 'post', '.first.md'),
+       path.join(post_dir, 'first.md'), config)
+
+// config
+fs.createWriteStream(path.join(out, 'config.json'))
+    .write(JSON.stringify(config, null, 2))

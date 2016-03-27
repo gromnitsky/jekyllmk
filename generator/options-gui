@@ -20,7 +20,22 @@ array set gui {
 
 set gui(dir) [expr {[llength $argv] ? [lindex $argv 0] : [pwd]}]; # Tcl is ugly
 
-set margin 0.3c;		# in centimeters
+set MN 0.3c;			# a margin in centimeters
+
+array set conf {}
+set conf(help) "
+After pressing <Return> the dialog spits to stdout a configuration
+based on your preferences. The jekyllmk-new tool picks it up & generates
+required files for jekyllmk engine. You can always tweak the configuration
+later on by editing config.json & local.* files directly.
+
+Pressing <Esc> aborts the whole process.
+"
+
+proc help_text {} {
+    global conf
+    return [string trim [regsub -all -- {(\S)\n(\S)} $conf(help) {\1 \2}]]
+}
 
 proc script_dir {} {
     set r [info script]
@@ -31,10 +46,10 @@ proc script_dir {} {
 }
 
 proc table_row {parent wname text var} {
-    global margin
+    global MN
     ttk::label $parent.${wname}_label -text $text
     ttk::entry $parent.$wname -textvariable gui($var) -width 40
-    grid $parent.${wname}_label $parent.$wname -padx $margin -pady "$margin 0"
+    grid $parent.${wname}_label $parent.$wname -padx $MN -pady "$MN 0"
     grid $parent.${wname}_label -sticky e
     grid $parent.$wname -sticky ew
 }
@@ -65,24 +80,29 @@ if {[tk windowingsystem] == "x11"} {
 }
 
 # Main
-set pic [image create photo -file \
-	     [file join [script_dir] sense-and-sensibility.png] -format png]
 ttk::frame .main
-ttk::label .main.pic -image $pic; # -relief sunken
+
+set pic [image create photo -file [file join [script_dir] red-stapler.png]]
+ttk::frame .main.info
+ttk::label .main.info.pic -image $pic
+ttk::label .main.info.label -text [help_text] -wraplength [image width $pic]
+pack .main.info.pic .main.info.label -in .main.info -fill both -pady "0 $MN"
+
 ttk::frame .main.opts
-grid .main.pic .main.opts -in .main
-grid .main.pic -padx "$margin 0" -pady $margin
+grid .main.info .main.opts -in .main
+grid .main.info -padx "$MN 0" -pady $MN -sticky n
 grid .main.opts -sticky nesw
 grid columnconfigure .main 1 -weight 1
 pack .main -fill x
 
+
 # Meta
-ttk::labelframe .meta -text "Meta" -padding "0 0 0 $margin"
+ttk::labelframe .meta -text "Meta" -padding "0 0 0 $MN"
 
 ttk::label .meta.dir_label -text "Directory:"
 ttk::entry .meta.dir -textvariable gui(dir) -state readonly -takefocus 0 \
     -font TkFixedFont
-grid .meta.dir_label .meta.dir -sticky e -padx $margin -pady "$margin 0"
+grid .meta.dir_label .meta.dir -sticky e -padx $MN -pady "$MN 0"
 grid .meta.dir -sticky ew
 
 table_row .meta title "Site title:" title
@@ -95,39 +115,38 @@ ttk::radiobutton .meta.sort_ascending -text "ascending" \
 ttk::radiobutton .meta.sort_descending -text "descending" \
     -variable gui(calendar_treesort) -value descending
 pack .meta.sort_ascending .meta.sort_descending \
-    -in .meta.sort_radiobutton_frame -side left -padx "0 $margin"
-grid .meta.sort_label .meta.sort_radiobutton_frame -padx $margin -pady "$margin 0"
+    -in .meta.sort_radiobutton_frame -side left -padx "0 $MN"
+grid .meta.sort_label .meta.sort_radiobutton_frame -padx $MN -pady "$MN 0"
 grid .meta.sort_label -sticky e
 grid .meta.sort_radiobutton_frame -sticky w
 
 grid columnconfigure .meta 1 -weight 1
-pack .meta -fill x -padx $margin -pady "$margin 0" -in .main.opts
+pack .meta -fill x -padx $MN -pady "$MN 0" -in .main.opts
 
 
 # Visual Components
-ttk::labelframe .comp -text "Visual Components" -padding "0 0 0 $margin"
+ttk::labelframe .comp -text "Visual Components" -padding "0 0 0 $MN"
 ttk::checkbutton .comp.avatar -text "Avatar" -variable gui(avatar)
-ttk::checkbutton .comp.about_page -text "About page" \
-    -variable gui(about_page)
+ttk::checkbutton .comp.about_page -text "About page" -variable gui(about_page)
 ttk::checkbutton .comp.header -text "Custom header" -variable gui(header)
 ttk::checkbutton .comp.footer -text "Custom footer" -variable gui(footer)
 ttk::checkbutton .comp.css_example -text "Local CSS example" \
     -variable gui(css_example)
 
-grid .comp.avatar .comp.about_page  -padx $margin -pady "$margin 0"  -sticky w
+grid .comp.avatar .comp.about_page  -padx $MN -pady "$MN 0"  -sticky w
 grid .comp.header .comp.footer .comp.css_example \
-    -padx $margin -pady "$margin 0" -sticky w
-pack .comp -fill x -padx $margin -pady "$margin 0"  -in .main.opts
+    -padx $MN -pady "$MN 0" -sticky w
+pack .comp -fill x -padx $MN -pady "$MN 0"  -in .main.opts
 
 
 # Atom feed
-ttk::labelframe .feed -text "Atom feed" -padding "0 0 0 $margin"
+ttk::labelframe .feed -text "Atom feed" -padding "0 0 0 $MN"
 table_row .feed baseurl "Base URL:" feed_baseurl
 .feed.baseurl configure -font TkFixedFont
 table_row .feed author "Author:" feed_author
 grid columnconfigure .feed 1 -weight 1
 
-pack .feed -fill x -padx $margin -pady $margin  -in .main.opts
+pack .feed -fill x -padx $MN -pady $MN  -in .main.opts
 
 
 # Separator
@@ -142,7 +161,7 @@ ttk::button .buttons.ok -text "OK" -command ok -default active
 bind . <Return> [list .buttons.ok invoke]
 focus .buttons.ok
 
-pack .buttons.cancel .buttons.ok -side left -padx "$margin 0"
-pack .buttons -padx $margin -pady $margin -side right -anchor se
+pack .buttons.cancel .buttons.ok -side left -padx "$MN 0"
+pack .buttons -padx $MN -pady $MN -side right -anchor se
 
 raise .;    # w/o this Windows 10 doesn't give us the focus on startup

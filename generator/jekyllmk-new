@@ -21,7 +21,7 @@ let user_opts = function() {
 
 let render = function(src, dest, view) {
     fs.createWriteStream(dest)
-	.write(Mustache.render(fs.readFileSync(dest).toString(), view))
+	.write(Mustache.render(fs.readFileSync(src).toString(), view))
 }
 
 let opts = user_opts()
@@ -47,8 +47,11 @@ sh.config.verbose = true
 sh.config.fatal = true
 
 if (opts.avatar === "1") sh.cp(path.join(src, 'ua.jpg'), out)
-if (opts.about_page === "1")
-    sh.exec(quote(['cp', '-RLf', path.join(src, 'about'), out]))
+if (opts.about_page === "1") {
+    let about_dir = path.join(out, 'p')
+    sh.mkdir('-p', about_dir)
+    sh.exec(quote(['cp', '-RLf', path.join(src, 'about'), about_dir]))
+}
 
 // header
 if (opts.header === "1") sh.cp(path.join(src, 'local.header.html'), out)

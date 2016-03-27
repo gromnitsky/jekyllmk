@@ -15,10 +15,10 @@ array set gui {
     about_page 1
     header 0
     footer 1
+    css_example 0
 }
 
-array set conf {}
-set conf(dir) [expr {[llength $argv] ? [lindex $argv 0] : [pwd]}]; # Tcl is ugly
+set gui(dir) [expr {[llength $argv] ? [lindex $argv 0] : [pwd]}]; # Tcl is ugly
 
 set margin 0.3c;		# in centimeters
 
@@ -80,7 +80,7 @@ pack .main -fill x
 ttk::labelframe .meta -text "Meta" -padding "0 0 0 $margin"
 
 ttk::label .meta.dir_label -text "Directory:"
-ttk::entry .meta.dir -textvariable conf(dir) -state readonly -takefocus 0 \
+ttk::entry .meta.dir -textvariable gui(dir) -state readonly -takefocus 0 \
     -font TkFixedFont
 grid .meta.dir_label .meta.dir -sticky e -padx $margin -pady "$margin 0"
 grid .meta.dir -sticky ew
@@ -111,9 +111,12 @@ ttk::checkbutton .comp.about_page -text "About page" \
     -variable gui(about_page)
 ttk::checkbutton .comp.header -text "Custom header" -variable gui(header)
 ttk::checkbutton .comp.footer -text "Custom footer" -variable gui(footer)
+ttk::checkbutton .comp.css_example -text "Local CSS example" \
+    -variable gui(css_example)
 
 grid .comp.avatar .comp.about_page  -padx $margin -pady "$margin 0"  -sticky w
-grid .comp.header .comp.footer  -padx $margin -pady "$margin 0" -sticky w
+grid .comp.header .comp.footer .comp.css_example \
+    -padx $margin -pady "$margin 0" -sticky w
 pack .comp -fill x -padx $margin -pady "$margin 0"  -in .main.opts
 
 

@@ -1,0 +1,31 @@
+/* Insert your CSS rules here */
+
+#jekyllmk-container__sidebar1 {
+  background-color: white;
+  color: black;
+  word-wrap: break-word;
+}
+
+.treeview__node--selected {
+  color: black !important;
+}
+
+#jekyllmk-container__sidebar1 .selected {
+  color: black;
+}
+
+#jekyllmk-container__sidebar1 a {
+  color: blue;
+  text-decoration: none;
+}
+
+@media (min-width: 950px) {
+  #jekyllmk-container__body {
+    border-left: 1px dotted black;
+  }
+}
+
+span.treeview__node--leaf {
+  display:list-item;
+  list-style-type: circle;
+}

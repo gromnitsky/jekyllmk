@@ -20,6 +20,7 @@ let user_opts = function() {
 }
 
 let render = function(src, dest, view) {
+    console.log(`render ${src} -> ${dest}`)
     fs.createWriteStream(dest)
 	.write(Mustache.render(fs.readFileSync(src).toString(), view))
 }
@@ -37,6 +38,12 @@ let config = {
 
     "calendar": {
 	"treesort": opts.calendar_treesort
+    }
+}
+let view = {
+    config,
+    date: {
+	year: (new Date()).getFullYear()
     }
 }
 
@@ -57,7 +64,10 @@ if (opts.about_page === "1") {
 if (opts.header === "1") sh.cp(path.join(src, 'local.header.html'), out)
 
 // footer
-if (opts.footer === "1") sh.cp(path.join(src, 'local.footer.html'), out)
+if (opts.footer === "1") {
+    render(path.join(src, '.local.footer.html'),
+	   path.join(out, 'local.footer.html'), view)
+}
 
 // local css
 if (opts.css_example === "1") {
@@ -74,7 +84,7 @@ let post_dir = path.join(out, d.getFullYear().toString(), pad(d.getMonth()),
 sh.mkdir('-p', post_dir)
 sh.exec(`cp ${path.join(src, 'post', '*')} ${post_dir}`)
 render(path.join(src, 'post', '.first.md'),
-       path.join(post_dir, 'first.md'), config)
+       path.join(post_dir, 'first.md'), view)
 
 // config
 fs.createWriteStream(path.join(out, 'config.json'))

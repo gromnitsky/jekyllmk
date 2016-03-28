@@ -12,7 +12,7 @@ out.tmp := $(NODE_ENV)
 src.mk := $(realpath $(lastword $(MAKEFILE_LIST)))
 src := $(dir $(src.mk))
 
-DATA := $(src)/test/data/shevchenko
+DATA := $(src)/test/data/shevchenko/
 
 mkdir = @mkdir -p $(dir $@)
 define copy =
@@ -36,9 +36,9 @@ node_modules.mk: node_modules
 
 
 data.src := $(shell find $(DATA) -type f ! -ipath '*/.git/*')
-data.dest := $(patsubst $(DATA)/%, $(out)/%, $(data.src))
+data.dest := $(patsubst $(DATA)%, $(out)/%, $(data.src))
 
-$(data.dest): $(out)/%: $(DATA)/%
+$(data.dest): $(out)/%: $(DATA)%
 	$(copy)
 
 compile: $(data.dest)

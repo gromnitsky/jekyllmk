@@ -44,7 +44,8 @@ let view = {
     config,
     date: {
 	year: (new Date()).getFullYear()
-    }
+    },
+    jekyllmk_src: path.resolve(path.dirname(__dirname))
 }
 
 let src = path.join(__dirname, 'templates')
@@ -79,12 +80,15 @@ if (opts.css_example === "1") {
 
 // post
 let d = new Date()
-let post_dir = path.join(out, d.getFullYear().toString(), pad(d.getMonth()),
+let post_dir = path.join(out, d.getFullYear().toString(), pad(d.getMonth()+1),
 			 pad(d.getDate()))
 sh.mkdir('-p', post_dir)
 sh.exec(`cp ${path.join(src, 'post', '*')} ${post_dir}`)
 render(path.join(src, 'post', '.first.md'),
        path.join(post_dir, 'first.md'), view)
+
+// Makefile
+render(path.join(src, '.Makefile'), path.join(out, 'Makefile'), view)
 
 // config
 fs.createWriteStream(path.join(out, 'config.json'))

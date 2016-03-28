@@ -35,7 +35,7 @@ node_modules.mk: node_modules
 	touch $@
 
 
-data.src := $(shell find $(DATA) -type f ! -ipath '*/.git/*')
+data.src := $(shell find $(DATA) -type f ! -ipath '*/.git/*' ! -ipath '*/Makefile')
 data.dest := $(patsubst $(DATA)%, $(out)/%, $(data.src))
 
 $(data.dest): $(out)/%: $(DATA)%

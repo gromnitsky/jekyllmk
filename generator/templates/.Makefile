@@ -15,7 +15,10 @@ shellquote = '$(subst ','\'',$(1))'
 .PHONY: compile
 compile:
 	$(dir.check)
-	$(MAKE) -f $(jekyllmk.src)/main.mk NODE_ENV=production DATA=$(src)
+	$(MAKE) --no-print-directory -f $(jekyllmk.src)/main.mk NODE_ENV=production DATA=$(src)
+# check for leftovers
+	@$(MAKE) --no-print-directory -f $(jekyllmk.src)/main.mk \
+		NODE_ENV=production DATA=$(src) diff
 
 new.date := $(shell date +%Y/%m/%d)
 new.post := $(src)/$(shell mktemp -u $(new.date)/XXXXXX.md)
@@ -31,6 +34,6 @@ new:
 sync.dest := root@router:/home/www/blog/
 
 .PHONY: sync
-sync:
+sync: compile
 	$(dir.check)
 	rsync -avPL --delete -e ssh production/site/ $(sync.dest)

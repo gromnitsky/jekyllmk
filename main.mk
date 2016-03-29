@@ -6,18 +6,32 @@ compile:
 pp-%:
 	@echo "$(strip $($*))" | tr ' ' \\n
 
+# our 'umbrella' dir
 NODE_ENV ?= development
+
 out := $(NODE_ENV)/site
 out.tmp := $(NODE_ENV)
 src.mk := $(realpath $(lastword $(MAKEFILE_LIST)))
 src := $(dir $(src.mk))
 
+ifdef OFFLINE
+NPM_OPT += --cache-min 99999999
+endif
+
 DATA := $(src)/test/data/shevchenko/
+$(if $(filter %/,$(DATA)),,$(error DATA must end with '/'))
 
 mkdir = @mkdir -p $(dir $@)
 define copy =
 $(mkdir)
 cp $< $@
+endef
+
+compile.all :=
+# $(eval $(call compile-push,$(files)))
+define compile-push =
+compile: $(1)
+compile.all += $(1)
 endef
 
 
@@ -32,28 +46,28 @@ package.json: $(src)/package.json
 # automatically restart Make if there is no node_modules folder
 include node_modules.mk
 node_modules.mk: node_modules
+	@printf "\033[0;33m%s\033[0;m\n" 'Restarting $(MAKE)...'
 	touch $@
 
 
-data.src := $(shell find $(DATA) -type f ! -ipath '*/.git/*' ! -ipath '*/Makefile')
+data.src := $(shell find $(DATA) -type f \
+	! -ipath '*/.git/*' ! -ipath '$(DATA)Makefile')
 data.dest := $(patsubst $(DATA)%, $(out)/%, $(data.src))
 
 $(data.dest): $(out)/%: $(DATA)%
 	$(copy)
 
-compile: $(data.dest)
-
+$(eval $(call compile-push,$(data.dest)))
 
 $(out)/index.json: $(data.dest)  node_modules.mk
 	$(src)/index $(data.dest) > $@
 
-compile: $(out)/index.json
-
+$(eval $(call compile-push,$(out)/index.json))
 
 $(out)/feed.xml: $(data.dest)  node_modules.mk
 	$(src)/feed -c $(out)/config.json $(data.dest) > $@
 
-compile: $(out)/feed.xml
+$(eval $(call compile-push,$(out)/feed.xml))
 
 
 npm.ext := .min.css .css .min.js .js
@@ -77,8 +91,7 @@ $(foreach file, $(npm.src), \
 	$(eval $(call npm-rule,$(file),$(out)/.npm/$(file))))
 
 $(npm.dest): node_modules.mk
-compile: $(npm.dest)
-
+$(eval $(call compile-push,$(npm.dest)))
 
 app.static.src := $(filter-out %.js, $(wildcard $(src)/app/*))
 app.static.dest := $(patsubst $(src)/app/%, $(out)/%, $(app.static.src))
@@ -86,8 +99,7 @@ app.static.dest := $(patsubst $(src)/app/%, $(out)/%, $(app.static.src))
 $(app.static.dest): $(out)/%: $(src)/app/%
 	$(copy)
 
-compile: $(app.static.dest)
-
+$(eval $(call compile-push,$(app.static.dest)))
 
 # unconditional compilation
 lib.js.src := $(wildcard $(src)/lib/*.js)
@@ -98,8 +110,7 @@ $(out.tmp)/%.js: $(src)/%.js
 	$(babel) --presets es2015 $(BABEL_OPT) $< -o $@
 
 $(lib.js.dest): node_modules.mk
-compile: $(lib.js.dest)
-
+$(eval $(call compile-push,$(lib.js.dest)))
 
 # browser-facing javascript
 app.js.src := $(wildcard $(src)/app/*.js)
@@ -148,7 +159,7 @@ UGLIFYJS_OPT := --screw-ie8 -m -c
 	node_modules/.bin/uglifyjs $(UGLIFYJS_OPT) -o $@ -- $<
 
 $(es6.dest): node_modules.mk
-compile: $(es6.dest)
+$(eval $(call compile-push,$(es6.dest)))
 
 
 mocha := node_modules/.bin/mocha
@@ -173,6 +184,7 @@ lint: lint-css
 
 
 # a custom minification of angular2 umd bundle
+# FIXME: remove after the upstream fix
 $(out)/.npm/angular2.js: node_modules/angular2/bundles/angular2-all.umd.js node_modules.mk
 ifeq ($(NODE_ENV), production)
 	node_modules/.bin/uglifyjs --screw-ie8 -c -o $@ -- $<
@@ -180,7 +192,7 @@ else
 	$(copy)
 endif
 
-compile: $(out)/.npm/angular2.js
+$(eval $(call compile-push,$(out)/.npm/angular2.js))
 
 
 # new site generator
@@ -194,3 +206,11 @@ $(NEW)/config.js:
 
 .PHONY: generate
 generate: $(NEW)/config.js
+
+
+# print a diff between should-be files & a real situation
+.PHONY: diff
+diff: compile
+	@echo "$(strip $(compile.all))" | tr ' ' \\n | sort > should
+	@find $(NODE_ENV) -type f | sort > real
+	@diff -u should real && rm should real

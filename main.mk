@@ -74,8 +74,17 @@ npm.ext := .min.css .css .min.js .js
 ifeq ($(NODE_ENV), development)
 npm.ext := .css .dev.js .js
 endif
-npm.src := angular2/bundles/angular2-polyfills.js \
+npm.src := zone.js/dist/zone.js \
+	reflect-metadata/Reflect.js \
 	rxjs/bundles/Rx.umd.js \
+	@angular/core/core.umd.js \
+	@angular/common/common.umd.js \
+	@angular/compiler/compiler.umd.js \
+	@angular/platform-browser/platform-browser.umd.js \
+	@angular/platform-browser-dynamic/platform-browser-dynamic.umd.js \
+	@angular/http/http.umd.js \
+	@angular/router-deprecated/router-deprecated.umd.js \
+	\
 	babel-polyfill/dist/polyfill.js \
 	angular2-treeview/dist/treeview.css
 
@@ -181,18 +190,6 @@ lint-css: $(css.dest)
 	stylelint --config $(src)/stylelint.config.js $^
 
 lint: lint-css
-
-
-# a custom minification of angular2 umd bundle
-# FIXME: remove after the upstream fix
-$(out)/.npm/angular2.js: node_modules/angular2/bundles/angular2-all.umd.js node_modules.mk
-ifeq ($(NODE_ENV), production)
-	node_modules/.bin/uglifyjs --screw-ie8 -c -o $@ -- $<
-else
-	$(copy)
-endif
-
-$(eval $(call compile-push,$(out)/.npm/angular2.js))
 
 
 # new site generator

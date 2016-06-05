@@ -1,6 +1,9 @@
 /* globals ng, Rx */
 'use strict';
 
+// FIXME: switch to a 'new' router
+ng.router = ng.router_deprecated
+
 let post = require('../lib/post')
 let index = require('../lib/index')
 let tags = require('../lib/tags')
@@ -170,7 +173,7 @@ app.Tags = ng.core.Component({
     directives: [ng.router.ROUTER_DIRECTIVES],
 }).Class({
     constructor:
-    [ng.router.Router, ng.router.RouteParams, ng.router.Location, NavService, ng.platform.browser.Title, function (router, params, location, ns, title) {
+    [ng.router.Router, ng.router.RouteParams, ng.common.Location, NavService, ng.platformBrowser.Title, function (router, params, location, ns, title) {
 	console.log("app.Tags")
 	this.router = router
 	this.params = params.params
@@ -240,7 +243,7 @@ app.Post.Main = ng.core.Component({
     directives: [ng.router.ROUTER_DIRECTIVES, app.Post.Nav, app.Post.TagsList],
 }).Class({
     constructor:
-    [ng.router.Router, ng.router.RouteParams, PostService, OBD, NavService, ng.platform.browser.Title, function (router, params, ps, obd, ns, title) {
+    [ng.router.Router, ng.router.RouteParams, PostService, OBD, NavService, ng.platformBrowser.Title, function (router, params, ps, obd, ns, title) {
 	console.log('app.Post.Main')
 	this.router = router
 	this.params = params.params
@@ -300,7 +303,7 @@ app.Page = ng.core.Component({
     providers: [PageService]
 }).Class({
     constructor:
-    [ng.router.Router, ng.router.RouteParams, PageService, OBD, NavService, ng.platform.browser.Title, function (router, params, ps, obd, ns, title) {
+    [ng.router.Router, ng.router.RouteParams, PageService, OBD, NavService, ng.platformBrowser.Title, function (router, params, ps, obd, ns, title) {
 	console.log('app.Page')
 	this.router = router
 	this.params = params.params
@@ -456,7 +459,7 @@ app.Main = ng.router.RouteConfig([
 
 
 document.addEventListener('DOMContentLoaded', function () {
-    ng.platform.browser
+    ng.platformBrowserDynamic
 	.bootstrap(app.Main, [
 	    IndexService,
 	    OBD,
@@ -467,8 +470,8 @@ document.addEventListener('DOMContentLoaded', function () {
 	    ng.http.HTTP_PROVIDERS,
 
 	    ng.router.ROUTER_PROVIDERS,
-	    ng.core.provide(ng.router.LocationStrategy,
-			    { useClass: ng.router.HashLocationStrategy }),
-	    ng.platform.browser.Title
+	    ng.core.provide(ng.common.LocationStrategy,
+			    { useClass: ng.common.HashLocationStrategy }),
+	    ng.platformBrowser.Title
 	])
 })

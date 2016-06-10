@@ -70,22 +70,16 @@ $(out)/feed.xml: $(data.dest)  node_modules.mk
 $(eval $(call compile-push,$(out)/feed.xml))
 
 
+ng.dest := $(out)/vendor/angular.browserify.js
+include $(src)/mk/ng.mk
+$(eval $(call compile-push,$(ng.compile)))
+
+
 npm.ext := .min.css .css .min.js .js
 ifeq ($(NODE_ENV), development)
 npm.ext := .css .dev.js .js
 endif
-npm.src := zone.js/dist/zone.js \
-	reflect-metadata/Reflect.js \
-	rxjs/bundles/Rx.umd.js \
-	@angular/core/core.umd.js \
-	@angular/common/common.umd.js \
-	@angular/compiler/compiler.umd.js \
-	@angular/platform-browser/platform-browser.umd.js \
-	@angular/platform-browser-dynamic/platform-browser-dynamic.umd.js \
-	@angular/http/http.umd.js \
-	@angular/router-deprecated/router-deprecated.umd.js \
-	\
-	babel-polyfill/dist/polyfill.js \
+npm.src := babel-polyfill/dist/polyfill.js \
 	angular2-treeview/dist/treeview.css
 
 npm-get-src = $(firstword $(foreach ext,$(npm.ext),\

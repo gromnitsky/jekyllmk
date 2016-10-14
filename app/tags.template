@@ -27,7 +27,7 @@
 </p>
 
 <ul>
- <li *ngFor="#idx of result">
+ <li *ngFor="let idx of result">
    {{ ns.data.index.posts[idx].y }}/{{ ns.data.index.posts[idx].m }}/{{ ns.data.index.posts[idx].d }}
    <a [routerLink]="['Post', {year: ns.data.index.posts[idx].y, month: ns.data.index.posts[idx].m, day: ns.data.index.posts[idx].d, name: ns.data.index.posts[idx].n }]">
      {{ ns.data.index.posts[idx].s }}

@@ -226,7 +226,7 @@ app.Post.TagsList = ng.core.Component({
     selector: 'post-tags-list',
     inputs: ['src'],
     template: `
-<span *ngFor="#name of src; #last = last">
+<span *ngFor="let name of src; let last = last">
   <a [routerLink]="['Tags', {list: name }]">{{ name }}</a><span *ngIf="!last">,</span>
 </span>
 `,
@@ -331,7 +331,7 @@ app.Sidebar1.TagsList = ng.core.Component({
     directives: [ng.router.ROUTER_DIRECTIVES],
     template: `
 <ul>
-  <li *ngFor="#idx of src">
+  <li *ngFor="let idx of src">
     <a [routerLink]="['Tags', {list: idx.name }]">{{ idx.name }}</a>
     ({{ idx.count }})
   </li>
@@ -395,7 +395,7 @@ app.OBD = ng.core.Component({
     selector: 'obd',
     template: `<div id="jekyllmk-obd" *ngIf="obd.err.length">
 <ul>
-  <li *ngFor="#item of obd.err">{{ item }}</li>
+  <li *ngFor="let item of obd.err">{{ item }}</li>
 </ul>
 </div>`,
 }).Class({

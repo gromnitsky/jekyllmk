@@ -492,18 +492,41 @@ app.MainModule = ng.core.NgModule({
 
 let boot = function() {
     let config = 'config.json'
-    fetch(config)
-	.then( res => {
-	    return res.json()
-	}).then( json => {
-	    // create a global config object
-	    window.JekyllmkConfig = json
-	    ng.platformBrowserDynamic.platformBrowserDynamic()
-		.bootstrapModule(app.MainModule)
-	}).catch( err => {
-	    console.log(err)
-	    document.body.innerHTML = `<h1>Failed to load ${config}</h1>`
+
+    // IE11 doesn't support fetch()
+    let get = function(url) {
+	return new Promise( (resolve, reject) => {
+	    let req = new XMLHttpRequest()
+	    req.addEventListener("load", function() {
+		if (this.status !== 200) {
+		    reject(new Error(this.status))
+		    return
+		}
+
+		// create a global config object
+		try {
+		    window.JekyllmkConfig = JSON.parse(req.responseText)
+		} catch (err) {
+		    reject(err)
+		    return
+		}
+		ng.platformBrowserDynamic.platformBrowserDynamic()
+		    .bootstrapModule(app.MainModule)
+		resolve(1)
+	    })
+
+	    req.addEventListener("error", () => {
+		reject(new Error('failed to transfer'))
+	    })
+	    req.open("GET", url)
+	    req.send()
 	})
+    }
+
+    get(config).catch( err => {
+	document.body.innerHTML = `<h1>Failed to load ${config}</h1>`
+	console.log(err)
+    })
 }
 
 if (document.readyState === "loading")

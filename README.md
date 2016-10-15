@@ -10,7 +10,7 @@ Make-based language. It's:
 The purpose of it is a stand-alone blog that can be served via any
 static HTTP server. (When I write _a stand-alone_ I feel like I'm
 being transferred into 2006.) A semi-live example
-[exists](http://biterror.tk/blog/), that's hosted on a tuppeny openwrt
+[exists](http://sigwait.tk/blog/), that's hosted on a tuppeny openwrt
 router.
 
 Similarities between Jekyll & jekyllmk:
@@ -34,7 +34,7 @@ Differences between Jekyll & jekyllmk:
 
 ## Requirements
 
-* Node.js 5.9.1
+* Node.js 6.6
 * Tcl/Tk 8.6.4 (for generation of a new site only)
 * `npm i -g json`
 
@@ -82,7 +82,6 @@ Differences between Jekyll & jekyllmk:
 
 ## TODO
 
-* Extend tag search to post subjects as well.
 * FTS. We can employ sqlite FTS & write a tiny server that responds w/
   an jekyllmk-index-like json.
 * A default way to add third-party JS comments systems.

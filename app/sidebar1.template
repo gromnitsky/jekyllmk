@@ -13,6 +13,10 @@
 	    [node_click]="node_click">
   </treeview>
 
+  <p>
+    <a *ngIf="ns?.data?.config?.fts" routerLink="search">&clubs; Search</a>
+  </p>
+
   <h2>Authors</h2>
   <tagsList [src]="ns?.data?.index?.authors"></tagsList>
 

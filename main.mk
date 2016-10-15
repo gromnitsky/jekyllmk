@@ -80,7 +80,8 @@ ifeq ($(NODE_ENV), development)
 npm.ext := .css .dev.js .js
 endif
 npm.src := babel-polyfill/dist/polyfill.js \
-	angular2-treeview/dist/treeview.css
+	angular2-treeview/dist/treeview.css \
+	systemjs/dist/system.js
 
 npm-get-src = $(firstword $(foreach ext,$(npm.ext),\
 	$(or $(wildcard node_modules/$(basename $(1))$(ext)))))

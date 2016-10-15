@@ -18,14 +18,12 @@ let IndexService = ng.core.Class({
     constructor: [ng.http.Http, function(http) {
 	console.log('IndexService: http.get')
 	this.url_index = 'index.json'
-	this.url_config = 'config.json'
 
 	let index$ = http.get(this.url_index).map(res => res.json())
-	let config$ = http.get(this.url_config).map(res => res.json())
-	this.$src = Rx.Observable.zip(index$, config$, (index, config) => {
+	this.$src = Rx.Observable.zip(index$, (index) => {
 	    return {
 		index,
-		config
+		config: JekyllmkConfig
 	    }
 	})
     }]
@@ -352,7 +350,7 @@ app.Sidebar1.AboutLink = ng.core.Component({
   <p *ngIf="ns?.about">
     <a [routerLink]="['/p/', ns?.about?.n]"
        [class.selected]="ns?.about?.n == ns?.curpage">
-      {{ ns?.about?.s }}
+      &diams; {{ ns?.about?.s }}
     </a>
   </p>
 </div>
@@ -457,9 +455,9 @@ app.MainModule = ng.core.NgModule({
 	    { path: 'tags/:list', component: app.Tags },
 	    { path: ':year/:month/:day/:name', component: app.Post.Main },
 	    { path: 'p/:name', component: app.Page },
+	    { path: 'search', loadChildren: 'fts-angular2.js#JekyllmkFTSModule'},
+	    { path: 'search/:q', loadChildren: 'fts-angular2.js#JekyllmkFTSModule'},
 	    { path: '**', component: app.RouteError },
-//	    { path: 'search', loadChildren: 'fts-angular2.js#JekyllmkFTSModule'},
-//	    { path: 'search/:q', loadChildren: 'fts-angular2.js#JekyllmkFTSModule'},
 	], { useHash: true }),
     ],
     providers: [

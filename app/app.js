@@ -233,7 +233,8 @@ app.Post.Main = ng.core.Component({
     templateUrl: 'post.template',
 }).Class({
     constructor:
-    [ng.router.ActivatedRoute, PostService, OBD, NavService, ng.platformBrowser.Title, function (activated_route, ps, obd, ns, title) {
+    [ng.platformBrowser.DomSanitizer, ng.router.ActivatedRoute, PostService, OBD, NavService, ng.platformBrowser.Title,
+     function (domsanitizer, activated_route, ps, obd, ns, title) {
 	console.log('app.Post.Main')
 	this.params = activated_route.snapshot.params
 	this.ns = ns
@@ -248,6 +249,7 @@ app.Post.Main = ng.core.Component({
 		console.log(`app.Post.Main: http.get ${ps.url(this.params)} DONE`)
 		this.data = data
 		if (!this.ns.data) throw new Error("no NavServide data")
+		this.data.body = domsanitizer.bypassSecurityTrustHtml(this.data.body)
 		this.ns.curpost = ns.data.cal
 		    .find(this.params.year, this.params.month,
 			  `${this.params.day}-${this.params.name}`)
@@ -296,7 +298,8 @@ app.Page = ng.core.Component({
     providers: [PageService]
 }).Class({
     constructor:
-    [ng.router.ActivatedRoute, PageService, OBD, NavService, ng.platformBrowser.Title, function (activated_route, ps, obd, ns, title) {
+    [ng.platformBrowser.DomSanitizer, ng.router.ActivatedRoute, PageService, OBD, NavService, ng.platformBrowser.Title,
+     function (domsanitizer, activated_route, ps, obd, ns, title) {
 	console.log('app.Page')
 	this.params = activated_route.snapshot.params
 	this.ns = ns
@@ -312,6 +315,7 @@ app.Page = ng.core.Component({
 		this.data = data
 		this.ns.curpage = this.params.name
 		if (!this.ns.data) throw new Error("no NavServide data")
+		this.data.body = domsanitizer.bypassSecurityTrustHtml(this.data.body)
 		this.title.setTitle(`${this.ns.data.config.title} :: ${data.subject}`)
 	    }).catch( err => {
 		ns.clean()

@@ -51,7 +51,7 @@ node_modules.mk: node_modules
 
 
 data.src := $(shell find $(DATA) -type f \
-	! -ipath '*/.git/*' ! -ipath '$(DATA)Makefile')
+	! -ipath '*/.git/*' ! -ipath '$(DATA)Makefile' ! -ipath '$(DATA)*.mk')
 data.dest := $(patsubst $(DATA)%, $(out)/%, $(data.src))
 
 $(data.dest): $(out)/%: $(DATA)%

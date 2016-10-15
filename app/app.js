@@ -1,8 +1,5 @@
-/* globals ng, Rx */
+/* globals ng, Rx, JekyllmkConfig */
 'use strict';
-
-// FIXME: switch to a 'new' router
-ng.router = ng.router_deprecated
 
 let post = require('../lib/post')
 let index = require('../lib/index')
@@ -160,7 +157,7 @@ app.LastN = ng.core.Component({
 	let first = this.ns.data.config.calendar.treesort === "descending" ? data.index.posts.length-1 : 0
 	let post = data.index.posts[first]
 	if (post) {
-	    this.router.navigate(['/Post', {year: post.y, month: post.m, day: post.d, name: post.n }])
+	    this.router.navigate(['/', post.y, post.m, post.d, post.n ])
 	} else {
 	    this.obd.push('app.LastN: no posts, cannot redirect')
 	}
@@ -170,24 +167,23 @@ app.LastN = ng.core.Component({
 app.Tags = ng.core.Component({
     selector: 'tags',
     templateUrl: 'tags.template',
-    directives: [ng.router.ROUTER_DIRECTIVES],
 }).Class({
     constructor:
-    [ng.router.Router, ng.router.RouteParams, ng.common.Location, NavService, ng.platformBrowser.Title, function (router, params, location, ns, title) {
+    [ng.router.ActivatedRoute, ng.common.Location, NavService, ng.platformBrowser.Title, function (activated_route, location, ns, title) {
 	console.log("app.Tags")
-	this.router = router
-	this.params = params.params
 	this.location = location
 	this.ns = ns
 	this.title = title
-	this.query = this.params.list
 	this.result = []
 
-	this._first = true
-	ns.clean()
-	ns.data$.subscribe( unused => {
-	    console.log('app.Tags: ns.data$.subscribe')
-	    this.on_submit()
+	// the callback runs every time route params change
+	activated_route.params.subscribe( fresh_params => {
+	    this.query = fresh_params.list
+	    ns.clean()
+	    ns.data$.subscribe( _unused => {
+		console.log('app.Tags: ns.data$.subscribe')
+		this.on_submit()
+	    })
 	})
     }],
 
@@ -198,8 +194,7 @@ app.Tags = ng.core.Component({
 	let r = tags.match_exact(this.ns.data, this.query)
 	this.result = this.ns.data.config.calendar.treesort === "descending" ? r.reverse() : r
 	// should work w/o triggering the router
-	if (!this._first) this.location.replaceState(`/tags/${this.query}`)
-	this._first = false
+	this.location.replaceState(`/tags/${this.query}`)
     }
 })
 
@@ -209,12 +204,11 @@ app.Post.Nav = ng.core.Component({
     template: `
 <nav class="jekyllmk-postnav">
   <a *ngIf="ps?.post_prev"
-     href="{{ ps?.post_prev?.url }}" title="{{ ps?.post_prev?.subject }}">&lArr;</a>
+     [routerLink]="[ps?.post_prev?.url]" title="{{ ps?.post_prev?.subject }}">&lArr;</a>
   <a *ngIf="ps?.post_next"
-     href="{{ ps?.post_next?.url }}" title="{{ ps?.post_next?.subject }}">&rArr;</a>
+     [routerLink]="[ps?.post_next?.url]" title="{{ ps?.post_next?.subject }}">&rArr;</a>
 </nav>
 `,
-    directives: [ng.router.ROUTER_DIRECTIVES]
 }).Class({
     constructor: [PostService, function(ps) {
 	console.log("app.Post.Nav")
@@ -227,10 +221,9 @@ app.Post.TagsList = ng.core.Component({
     inputs: ['src'],
     template: `
 <span *ngFor="let name of src; let last = last">
-  <a [routerLink]="['Tags', {list: name }]">{{ name }}</a><span *ngIf="!last">,</span>
+  <a [routerLink]="['/tags/', name]">{{ name }}</a><span *ngIf="!last">,</span>
 </span>
 `,
-    directives: [ng.router.ROUTER_DIRECTIVES]
 }).Class({
     constructor: function() {
 	console.log("app.Post.TagsList")
@@ -240,30 +233,33 @@ app.Post.TagsList = ng.core.Component({
 app.Post.Main = ng.core.Component({
     selector: 'post',
     templateUrl: 'post.template',
-    directives: [ng.router.ROUTER_DIRECTIVES, app.Post.Nav, app.Post.TagsList],
 }).Class({
     constructor:
-    [ng.router.Router, ng.router.RouteParams, PostService, OBD, NavService, ng.platformBrowser.Title, function (router, params, ps, obd, ns, title) {
+    [ng.router.ActivatedRoute, PostService, OBD, NavService, ng.platformBrowser.Title, function (activated_route, ps, obd, ns, title) {
 	console.log('app.Post.Main')
-	this.router = router
-	this.params = params.params
+	this.params = activated_route.snapshot.params
 	this.ns = ns
 	this.title = title
 
-	ns.clean()
-	ps.html$(this.params).toPromise().then(data => {
-	    console.log(`app.Post.Main: http.get ${ps.url(this.params)} DONE`)
-	    this.data = data
-	    if (!this.ns.data) throw new Error("no NavServide data")
-	    this.ns.curpost = ns.data.cal
-		.find(this.params.year, this.params.month,
-		      `${this.params.day}-${this.params.name}`)
+	// the callback runs every time route params change
+	activated_route.params.subscribe( fresh_params => {
+	    this.params = fresh_params
 
-	    this.title.setTitle(`${this.ns.data.config.title} :: ${['y', 'm', 'd'].map(val => this.ns.curpost.payload[val]).join('/')} :: ${this.ns.curpost.payload.s}`)
-	    ps.post_prev = this.find_next_url(-1)
-	    ps.post_next = this.find_next_url(1)
-	}).catch( err => {
-	    obd.push(`app.Post.Main: error in processing ${ps.url(this.params)}: ${err.message || err.status}`)
+	    ns.clean()
+	    ps.html$(this.params).toPromise().then(data => {
+		console.log(`app.Post.Main: http.get ${ps.url(this.params)} DONE`)
+		this.data = data
+		if (!this.ns.data) throw new Error("no NavServide data")
+		this.ns.curpost = ns.data.cal
+		    .find(this.params.year, this.params.month,
+			  `${this.params.day}-${this.params.name}`)
+
+		this.title.setTitle(`${this.ns.data.config.title} :: ${['y', 'm', 'd'].map(val => this.ns.curpost.payload[val]).join('/')} :: ${this.ns.curpost.payload.s}`)
+		ps.post_prev = this.find_next_url(-1)
+		ps.post_next = this.find_next_url(1)
+	    }).catch( err => {
+		obd.push(`app.Post.Main: error in processing ${ps.url(this.params)}: ${err.message || err.status}`)
+	    })
 	})
     }],
 
@@ -290,7 +286,7 @@ app.Post.Main = ng.core.Component({
 	if (!post) return null
 	return {
 	    // FIXME
-	    url: `#/${post.y}/${post.m}/${post.d}/${post.n}`,
+	    url: `/${post.y}/${post.m}/${post.d}/${post.n}`,
 	    subject: post.s
 	}
     }
@@ -299,27 +295,30 @@ app.Post.Main = ng.core.Component({
 app.Page = ng.core.Component({
     selector: 'page',
     templateUrl: 'page.template',
-    directives: [ng.router.ROUTER_DIRECTIVES],
     providers: [PageService]
 }).Class({
     constructor:
-    [ng.router.Router, ng.router.RouteParams, PageService, OBD, NavService, ng.platformBrowser.Title, function (router, params, ps, obd, ns, title) {
+    [ng.router.ActivatedRoute, PageService, OBD, NavService, ng.platformBrowser.Title, function (activated_route, ps, obd, ns, title) {
 	console.log('app.Page')
-	this.router = router
-	this.params = params.params
+	this.params = activated_route.snapshot.params
 	this.ns = ns
 	this.title = title
 
-	ns.clean()
-	ps.html$(this.params).toPromise().then( data => {
-	    console.log(`app.Page: http.get ${ps.url(this.params)} DONE`)
-	    this.data = data
-	    this.ns.curpage = this.params.name
-	    if (!this.ns.data) throw new Error("no NavServide data")
-	    this.title.setTitle(`${this.ns.data.config.title} :: ${data.subject}`)
-	}).catch( err => {
+	// the callback runs every time route params change
+	activated_route.params.subscribe( fresh_params => {
+	    this.params = fresh_params
+
 	    ns.clean()
-	    obd.push(`app.Page: error in processing ${ps.url(this.params)}: ${err.message || err.status}`)
+	    ps.html$(this.params).toPromise().then( data => {
+		console.log(`app.Page: http.get ${ps.url(this.params)} DONE`)
+		this.data = data
+		this.ns.curpage = this.params.name
+		if (!this.ns.data) throw new Error("no NavServide data")
+		this.title.setTitle(`${this.ns.data.config.title} :: ${data.subject}`)
+	    }).catch( err => {
+		ns.clean()
+		obd.push(`app.Page: error in processing ${ps.url(this.params)}: ${err.message || err.status}`)
+	    })
 	})
     }]
 })
@@ -328,11 +327,10 @@ app.Sidebar1 = {}
 app.Sidebar1.TagsList = ng.core.Component({
     selector: 'tagsList',
     inputs: ['src'],
-    directives: [ng.router.ROUTER_DIRECTIVES],
     template: `
 <ul>
   <li *ngFor="let idx of src">
-    <a [routerLink]="['Tags', {list: idx.name }]">{{ idx.name }}</a>
+    <a [routerLink]="['/tags/', idx.name]">{{ idx.name }}</a>
     ({{ idx.count }})
   </li>
 </ul>
@@ -352,14 +350,13 @@ app.Sidebar1.AboutLink = ng.core.Component({
 	 class="jekyllmk-img--responsive jekyll-avatar">
   <p>
   <p *ngIf="ns?.about">
-    <a [routerLink]="['Page', {name: ns?.about?.n}]"
+    <a [routerLink]="['/p/', ns?.about?.n]"
        [class.selected]="ns?.about?.n == ns?.curpage">
       {{ ns?.about?.s }}
     </a>
   </p>
 </div>
 `,
-    directives: [ng.router.ROUTER_DIRECTIVES],
 }).Class({
     constructor: [NavService, function (ns) {
 	console.log('app.Sidebar1.AboutLink')
@@ -370,7 +367,6 @@ app.Sidebar1.AboutLink = ng.core.Component({
 app.Sidebar1.Main = ng.core.Component({
     selector: 'sidebar1',
     templateUrl: 'sidebar1.template',
-    directives: [tw.TreeView, ng.router.ROUTER_DIRECTIVES, app.Sidebar1.TagsList, app.Sidebar1.AboutLink],
 }).Class({
     constructor: [ng.router.Router, NavService, function(router, ns) {
 	console.log('app.Sidebar1.Main')
@@ -387,7 +383,7 @@ app.Sidebar1.Main = ng.core.Component({
     node_click: function(event, tnode) {
 	if (!(tnode && tnode.kids.length === 0)) return
 	// `this` here is a TreeView instance
-	this.parent.router.navigate(['/Post', {year: tnode.payload.y, month: tnode.payload.m, day: tnode.payload.d, name: tnode.payload.n }])
+	this.parent.router.navigate(['/', tnode.payload.y, tnode.payload.m, tnode.payload.d, tnode.payload.n])
     },
 })
 
@@ -408,7 +404,6 @@ app.OBD = ng.core.Component({
 app.Main = ng.core.Component({
     selector: 'my-app',
     templateUrl: 'main.template',
-    directives: [ng.router.ROUTER_DIRECTIVES, app.Sidebar1.Main, app.OBD],
 }).Class({
     constructor: [NavService, HeaderFooterService, function(ns, hfs) {
 	console.log('app.Main')
@@ -431,6 +426,7 @@ app.Main = ng.core.Component({
     }
 })
 
+
 app.RouteError = ng.core.Component({
     selector: 'route-error',
     template: `<h2>Invalid route</h2><p>{{ insult }}</p>`,
@@ -449,29 +445,71 @@ app.RouteError = ng.core.Component({
     }]
 })
 
-app.Main = ng.router.RouteConfig([
-    { path: '/', component: app.LastN, name: 'LastN', useAsDefault: true },
-    { path: '/tags/:list', component: app.Tags, name: 'Tags' },
-    { path: '/:year/:month/:day/:name', component: app.Post.Main, name: 'Post' },
-    { path: '/p/*name', component: app.Page, name: 'Page' },
-    { path: '/**', component: app.RouteError, name: 'RouteError' }
-])(app.Main)
 
+app.MainModule = ng.core.NgModule({
+    imports: [
+	ng.platformBrowser.BrowserModule,
+	ng.forms.FormsModule,
+	ng.http.HttpModule,
+	ng.router.RouterModule.forRoot([
+	    { path: '', component: app.LastN },
+	    { path: 'LastN', component: app.LastN },
+	    { path: 'tags/:list', component: app.Tags },
+	    { path: ':year/:month/:day/:name', component: app.Post.Main },
+	    { path: 'p/:name', component: app.Page },
+	    { path: '**', component: app.RouteError },
+//	    { path: 'search', loadChildren: 'fts-angular2.js#JekyllmkFTSModule'},
+//	    { path: 'search/:q', loadChildren: 'fts-angular2.js#JekyllmkFTSModule'},
+	], { useHash: true }),
+    ],
+    providers: [
+	OBD,
+	IndexService,
+	HeaderFooterService,
+	PostService,
+	NavService,
+	PageService,
+    ],
+    declarations: [
+	tw.TreeView,
+	app.Sidebar1.AboutLink,
+	app.Sidebar1.TagsList,
+	app.Post.TagsList,
+	app.Post.Nav,
+	app.OBD,
 
-document.addEventListener('DOMContentLoaded', function () {
-    ng.platformBrowserDynamic
-	.bootstrap(app.Main, [
-	    IndexService,
-	    OBD,
-	    NavService,
-	    PostService,
-	    HeaderFooterService,
+	app.LastN,
+	app.Tags,
+	app.Post.Main,
+	app.Page,
+	app.Sidebar1.Main,
+	app.RouteError,
 
-	    ng.http.HTTP_PROVIDERS,
-
-	    ng.router.ROUTER_PROVIDERS,
-	    ng.core.provide(ng.common.LocationStrategy,
-			    { useClass: ng.common.HashLocationStrategy }),
-	    ng.platformBrowser.Title
-	])
+	app.Main
+    ],
+    bootstrap: [ app.Main ]
+}).Class({
+    constructor: function() {},
 })
+
+
+let boot = function() {
+    let config = 'config.json'
+    fetch(config)
+	.then( res => {
+	    return res.json()
+	}).then( json => {
+	    // create a global config object
+	    window.JekyllmkConfig = json
+	    ng.platformBrowserDynamic.platformBrowserDynamic()
+		.bootstrapModule(app.MainModule)
+	}).catch( err => {
+	    console.log(err)
+	    document.body.innerHTML = `<h1>Failed to load ${config}</h1>`
+	})
+}
+
+if (document.readyState === "loading")
+    document.addEventListener('DOMContentLoaded', boot)
+else
+    boot()

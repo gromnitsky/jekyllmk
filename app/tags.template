@@ -11,7 +11,7 @@
       <code>Тарас Шевченко,-image</code> <br>
 
       <input type="text" spellCheck="false" required
-	     [(ngModel)]="query">
+	     [(ngModel)]="query" [ngModelOptions]="{standalone: true}">
     </label>
 
     <input type="submit">
@@ -29,7 +29,7 @@
 <ul>
  <li *ngFor="let idx of result">
    {{ ns.data.index.posts[idx].y }}/{{ ns.data.index.posts[idx].m }}/{{ ns.data.index.posts[idx].d }}
-   <a [routerLink]="['Post', {year: ns.data.index.posts[idx].y, month: ns.data.index.posts[idx].m, day: ns.data.index.posts[idx].d, name: ns.data.index.posts[idx].n }]">
+   <a [routerLink]="['', ns.data.index.posts[idx].y, ns.data.index.posts[idx].m, ns.data.index.posts[idx].d, ns.data.index.posts[idx].n]">
      {{ ns.data.index.posts[idx].s }}
    </a>
   </li>

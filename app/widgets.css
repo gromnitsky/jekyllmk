@@ -2,8 +2,8 @@
   Defaults for jekyllmk components. You shouldn't edit them here--do
   you customizations in `local.css` file.
 
-  A prefix for all widgets is `jekyllmk-`. Don't use it in your css
-  code.
+  A prefix for all widgets is `jekyllmk-`. Don't use this prefix in
+  your css code.
 */
 
 
@@ -18,6 +18,12 @@
 
 body {
   font-family: Georgia, serif;
+}
+
+img, object, video, embed {
+  width: auto;
+  max-width: 100%;
+  height: auto;
 }
 
 /* a diff font for headers */
@@ -41,14 +47,9 @@ pre {
   white-space: pre-wrap;
 }
 
-.jekyllmk-img--responsive {
-  max-width: 100%;
-  width: 100%;
-  height: auto;
-}
-
 #jekyllmk-container {
   display: flex;
+  max-width: 100%;
 }
 
 
@@ -108,9 +109,14 @@ header.jekyllmk-header > h1 {
   flex: 0 0 0;
   background-color: brown;
   color: whitesmoke;
+  word-wrap: break-word;
 
   /* IE11 */
   width: 0;
+}
+
+#jekyllmk-container__body {
+  flex-grow: 1;
 }
 
 #jekyllmk-container__sidebar1 nav {
@@ -159,7 +165,8 @@ header.jekyllmk-header > h1 {
   }
 
   #jekyllmk-container__body {
-    padding: 0 1em;
+    width: 683px;
+    padding: 1em 0 1em 1em;
   }
 }
 
@@ -205,10 +212,10 @@ header.jekyllmk-header > h1 {
 
 
 /* About widget */
-.jekyll-about img {
+.jekyllmk-about img {
   border-radius: 6px;
 }
 
-.jekyll-about p {
+.jekyllmk-about p {
   margin-top: 0;
 }

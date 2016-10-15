@@ -342,10 +342,9 @@ app.Sidebar1.TagsList = ng.core.Component({
 app.Sidebar1.AboutLink = ng.core.Component({
     selector: 'aboutLink',
     template: `
-<div class="jekyll-about">
+<div class="jekyllmk-about">
   <p *ngIf="ns?.data?.config?.avatar">
-    <img src="{{ ns?.data?.config?.avatar }}" alt="avatar"
-	 class="jekyllmk-img--responsive jekyll-avatar">
+    <img src="{{ ns?.data?.config?.avatar }}" alt="avatar">
   <p>
   <p *ngIf="ns?.about">
     <a [routerLink]="['/p/', ns?.about?.n]"

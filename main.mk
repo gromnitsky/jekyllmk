@@ -182,7 +182,7 @@ css.dest := $(filter %.css, $(app.static.dest))
 
 .PHONY: lint-css
 lint-css: $(css.dest)
-	stylelint --config $(src)/stylelint.config.js $^
+	stylelint $^
 
 lint: lint-css
 
